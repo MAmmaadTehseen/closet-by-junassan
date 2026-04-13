@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Closet by Junassan
 
-## Getting Started
+Modern mobile-first e-commerce storefront for a Pakistani fashion thrift store. Cash on Delivery only.
 
-First, run the development server:
+Built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, **Supabase**, and **Zustand**.
+
+## Features
+
+- Instagram-style product grid, rails, hero
+- Mobile-first responsive layout, sticky header, slide-over nav
+- Shop page with category / size / price filters and sort
+- Product detail with gallery, stock urgency badges, related items
+- Cart (persisted to localStorage) + COD checkout
+- Supabase-backed products and orders (with automatic seed-data fallback)
+- SEO meta tags, sitemap, robots.txt
+- All contact info, socials, and WhatsApp number in a single config file
+
+## Quick start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000 — the site runs immediately using built-in seed data.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Connecting Supabase (optional)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create a project at https://supabase.com
+2. Open the SQL editor and run:
+   - `supabase/schema.sql`
+   - `supabase/seed.sql` (or upload your own products)
+3. Copy `.env.local.example` to `.env.local` and fill in:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+   ```
+   Legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` is still accepted as a fallback.
+4. Restart `npm run dev` — products now load from Supabase; orders save to the `orders` / `order_items` tables.
 
-## Learn More
+## Customizing brand info
 
-To learn more about Next.js, take a look at the following resources:
+All contact details, socials, WhatsApp number, and copy live in one place:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/lib/site-config.ts`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Edit there and the whole site updates.
 
-## Deploy on Vercel
+## Tech stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js 16 (App Router, Turbopack)
+- React 19.2
+- Tailwind CSS v4
+- Supabase (`@supabase/ssr`)
+- Zustand (cart persistence)
+- lucide-react (icons)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+Optimized for Vercel. Push to GitHub and import into Vercel — add the Supabase env vars in project settings.
+
+## Future payment integration
+
+The checkout is structured so a payment gateway can be added later without rewriting the flow:
+
+- `src/lib/orders.ts` exposes `createOrder` with a `paymentMethod` field
+- `src/components/checkout/CheckoutForm.tsx` has a swappable payment method block
