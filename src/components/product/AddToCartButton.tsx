@@ -1,57 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { ShoppingBag, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Check, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
+import { useUi } from "@/lib/ui-store";
+import { toast } from "@/components/ui/Toaster";
 import type { Product } from "@/lib/types";
 
-export default function AddToCartButton({ product }: { product: Product }) {
+export default function AddToCartButton({
+  product,
+  selectedSize,
+}: {
+  product: Product;
+  selectedSize?: string;
+}) {
   const add = useCart((s) => s.add);
-  const [added, setAdded] = useState(false);
+  const openCart = useUi((s) => s.openCart);
   const router = useRouter();
+  const soldOut = product.stock === 0;
 
-  const onAdd = () => {
+  const doAdd = () => {
     add({
       id: product.id,
       slug: product.slug,
       name: product.name,
       price_pkr: product.price_pkr,
       image: product.images[0] ?? "",
-      size: product.size,
+      size: selectedSize ?? product.size,
       quantity: 1,
       maxStock: product.stock,
     });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+    toast.success(`Added to bag — ${product.name}`);
   };
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row">
       <button
-        onClick={onAdd}
-        disabled={product.stock === 0}
-        className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3.5 text-sm font-semibold text-background transition hover:opacity-90 disabled:opacity-50"
+        onClick={() => {
+          doAdd();
+          openCart();
+        }}
+        disabled={soldOut}
+        className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90 disabled:opacity-50 focus-ring"
       >
-        {added ? (
-          <>
-            <Check className="h-4 w-4" /> Added
-          </>
-        ) : (
-          <>
-            <ShoppingBag className="h-4 w-4" /> Add to Cart
-          </>
-        )}
+        <ShoppingBag className="h-4 w-4" />
+        {soldOut ? "Sold out" : "Add to Bag"}
       </button>
       <button
         onClick={() => {
-          onAdd();
+          doAdd();
           router.push("/checkout");
         }}
-        disabled={product.stock === 0}
-        className="inline-flex flex-1 items-center justify-center rounded-full border border-foreground px-6 py-3.5 text-sm font-semibold text-foreground transition hover:bg-foreground hover:text-background disabled:opacity-50"
+        disabled={soldOut}
+        className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-ink px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-paper disabled:opacity-50 focus-ring"
       >
-        Buy Now
+        <Zap className="h-4 w-4" /> Buy Now
       </button>
     </div>
   );

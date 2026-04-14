@@ -21,9 +21,14 @@ export interface Product {
   brand: string;
   category: Category;
   price_pkr: number;
+  original_price_pkr?: number;
   size: string;
   condition: string;
   stock: number;
+  original_stock?: number;
+  fabric?: string;
+  measurements?: string;
+  care?: string;
   images: string[];
   tags: ProductTag[];
   created_at: string;

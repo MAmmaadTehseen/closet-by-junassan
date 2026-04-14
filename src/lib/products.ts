@@ -9,6 +9,7 @@ export interface ProductQuery {
   size?: string;
   sort?: "newest" | "price-asc" | "price-desc";
   tag?: "new" | "trending" | "limited";
+  q?: string;
   limit?: number;
 }
 
@@ -41,6 +42,18 @@ export async function fetchProducts(query: ProductQuery = {}): Promise<Product[]
   if (query.maxPrice !== undefined)
     result = result.filter((p) => p.price_pkr <= query.maxPrice!);
   if (query.size) result = result.filter((p) => p.size === query.size);
+  if (query.q) {
+    const q = query.q.toLowerCase().trim();
+    if (q) {
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.brand.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q),
+      );
+    }
+  }
 
   switch (query.sort) {
     case "price-asc":

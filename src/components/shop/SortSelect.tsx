@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const OPTIONS = [
   { value: "newest", label: "Newest" },
@@ -10,24 +10,28 @@ const OPTIONS = [
 
 export default function SortSelect() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
   const current = params.get("sort") ?? "newest";
 
   return (
-    <select
-      value={current}
-      onChange={(e) => {
-        const next = new URLSearchParams(params.toString());
-        next.set("sort", e.target.value);
-        router.push(`/shop?${next.toString()}`);
-      }}
-      className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium focus:border-foreground focus:outline-none"
-    >
-      {OPTIONS.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
+    <label className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+      Sort
+      <select
+        value={current}
+        onChange={(e) => {
+          const next = new URLSearchParams(params.toString());
+          next.set("sort", e.target.value);
+          router.push(`${pathname}?${next.toString()}`);
+        }}
+        className="rounded-full border border-border bg-paper px-4 py-2 text-xs font-semibold text-ink focus:border-ink focus:outline-none"
+      >
+        {OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
