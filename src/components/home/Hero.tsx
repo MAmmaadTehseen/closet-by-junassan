@@ -17,7 +17,7 @@ export default function Hero() {
         <div className="animate-fade-up">
           <p className="eyebrow">Curated Thrift · Weekly Drops</p>
           <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.02] tracking-[-0.015em] sm:text-5xl md:text-6xl lg:text-7xl">
-            Affordablee{" "}
+            Affordable{" "}
             <span className="italic text-ink/80">Branded</span> Fashion
             <br />
             for Everyone.
