@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/brand-icons";
+import ClearCartOnSuccess from "@/components/checkout/ClearCartOnSuccess";
 import { siteConfig, waLink } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
 
   return (
     <div className="mx-auto max-w-xl px-4 py-24 text-center sm:px-6">
+      <ClearCartOnSuccess />
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-ink bg-paper">
         <CheckCircle2 className="h-8 w-8 text-ink" />
       </div>

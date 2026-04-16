@@ -26,7 +26,6 @@ const EMPTY: Draft = { full_name: "", phone: "", city: "", address: "", notes: "
 
 export default function CheckoutForm() {
   const items = useCart((s) => s.items);
-  const clear = useCart((s) => s.clear);
   const [mounted, setMounted] = useState(false);
   const [pending, startTransition] = useTransition();
   const [step, setStep] = useState<1 | 2>(1);
@@ -99,8 +98,6 @@ export default function CheckoutForm() {
 
     startTransition(async () => {
       try {
-        clear();
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
         await createOrder({
           full_name: draft.full_name,
           phone: normalizePhone(draft.phone),
@@ -112,8 +109,9 @@ export default function CheckoutForm() {
           idempotencyKey: idempotencyKey.current,
         });
       } catch (err) {
+        // Re-throw redirect signals so Next.js can navigate.
+        if (err && typeof err === "object" && "digest" in err) throw err;
         const raw = err instanceof Error ? err.message : "Something went wrong";
-        if (raw.includes("NEXT_REDIRECT")) return;
         const msg = raw.replace(/^ORDER_ERROR:\s*/, "");
         toast.error(msg);
         setErrors({ _form: msg });
