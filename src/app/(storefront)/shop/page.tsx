@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
 import Filters from "@/components/shop/Filters";
 import SortSelect from "@/components/shop/SortSelect";
 import MobileFiltersDrawer from "@/components/shop/MobileFiltersDrawer";
+import FilterPills from "@/components/shop/FilterPills";
 import ProductGrid from "@/components/product/ProductGrid";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import { fetchProducts } from "@/lib/products";
@@ -33,19 +35,41 @@ async function ShopResults({ sp }: { sp: Awaited<SP> }) {
     sort: (sp.sort as "newest" | "price-asc" | "price-desc") || "newest",
     q: sp.q,
   });
+
+  if (products.length === 0) {
+    return (
+      <div className="py-24 text-center">
+        <p className="font-display text-2xl font-semibold">No results found</p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Try adjusting your filters or searching for something different.
+        </p>
+        <Link
+          href="/shop"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90"
+        >
+          Clear all filters
+        </Link>
+      </div>
+    );
+  }
+
   return <ProductGrid products={products} />;
 }
 
 export default async function ShopPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const all = await fetchProducts({
+
+  // Count results for the toolbar (single fetch, not duplicated)
+  const allForCount = await fetchProducts({
     category: (sp.category as Category) || undefined,
     size: sp.size,
     minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
     maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
-    sort: (sp.sort as "newest" | "price-asc" | "price-desc") || "newest",
+    sort: "newest",
     q: sp.q,
   });
+  const count = allForCount.length;
+  const isFiltered = !!(sp.category || sp.size || sp.minPrice || sp.maxPrice || sp.q);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
@@ -55,17 +79,25 @@ export default async function ShopPage({ searchParams }: { searchParams: SP }) {
           Shop All
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          {all.length} {all.length === 1 ? "piece" : "pieces"} currently available.
+          {isFiltered
+            ? `${count} ${count === 1 ? "result" : "results"} matching your filters`
+            : `${count} ${count === 1 ? "piece" : "pieces"} currently available`}
+          .
         </p>
       </div>
 
-      <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-paper p-3 sm:rounded-full sm:px-5">
-        <MobileFiltersDrawer resultCount={all.length} />
+      <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-paper p-3 sm:rounded-full sm:px-5">
+        <MobileFiltersDrawer resultCount={count} />
         <p className="hidden text-xs uppercase tracking-widest text-muted-foreground lg:inline">
-          {all.length} {all.length === 1 ? "result" : "results"}
+          {count} {count === 1 ? "result" : "results"}
         </p>
         <SortSelect />
       </div>
+
+      {/* Active filter pills (client component, reads URL params) */}
+      <Suspense fallback={null}>
+        <FilterPills />
+      </Suspense>
 
       <div className="grid gap-10 lg:grid-cols-[240px_1fr]">
         <div className="hidden lg:block">

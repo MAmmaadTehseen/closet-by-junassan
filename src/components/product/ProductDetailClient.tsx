@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Share2, Copy, Check, MessageCircle, Eye } from "lucide-react";
 import AddToCartButton from "./AddToCartButton";
+import RestockNotify from "./RestockNotify";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
 import Accordion from "@/components/ui/Accordion";
@@ -137,7 +138,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
       <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
 
-      <AddToCartButton product={product} selectedSize={selectedSize} />
+      {soldOut ? (
+        <RestockNotify productName={product.name} />
+      ) : (
+        <AddToCartButton product={product} selectedSize={selectedSize} />
+      )}
 
       <div className="flex items-center gap-2">
         <a

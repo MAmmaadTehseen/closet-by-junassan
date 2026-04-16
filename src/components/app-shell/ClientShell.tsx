@@ -5,6 +5,7 @@ import type { Product } from "@/lib/types";
 import Toaster from "@/components/ui/Toaster";
 import CartDrawer from "@/components/cart/CartDrawer";
 import RegisterSW from "@/components/app-shell/RegisterSW";
+import BackToTop from "@/components/ui/BackToTop";
 
 const SearchPalette = dynamic(() => import("@/components/search/SearchPalette"), {
   ssr: false,
@@ -17,6 +18,7 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <CartDrawer />
       <SearchPalette products={products} />
       <RegisterSW />
+      <BackToTop />
     </>
   );
 }

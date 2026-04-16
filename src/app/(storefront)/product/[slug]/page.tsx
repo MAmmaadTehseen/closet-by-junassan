@@ -60,6 +60,18 @@ export default async function ProductPage({ params }: { params: Params }) {
     },
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${siteConfig.url}/` },
+      category
+        ? { "@type": "ListItem", position: 2, name: category.label, item: `${siteConfig.url}/category/${category.slug}` }
+        : { "@type": "ListItem", position: 2, name: "Shop", item: `${siteConfig.url}/shop` },
+      { "@type": "ListItem", position: 3, name: product.name },
+    ],
+  };
+
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
@@ -96,6 +108,10 @@ export default async function ProductPage({ params }: { params: Params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
     </>
   );

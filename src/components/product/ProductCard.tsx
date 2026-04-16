@@ -4,6 +4,7 @@ import { formatPKR } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import WishlistButton from "./WishlistButton";
 import QuickAddButton from "./QuickAddButton";
+import QuickViewButton from "./QuickViewButton";
 
 export default function ProductCard({
   product,
@@ -69,6 +70,13 @@ export default function ProductCard({
             <span className="pointer-events-none absolute bottom-2 left-2 animate-soft-pulse rounded-full bg-accent-red px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-paper sm:bottom-2.5 sm:left-2.5 sm:px-2.5 sm:py-1">
               Only 1 left
             </span>
+          )}
+
+          {/* Quick view — bottom-left, shows on hover (desktop) */}
+          {!onlyOne && (
+            <div className="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5">
+              <QuickViewButton product={product} />
+            </div>
           )}
         </div>
 

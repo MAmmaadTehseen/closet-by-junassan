@@ -12,7 +12,7 @@ const COVER: Record<string, string> = {
   bags: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1000&q=80",
 };
 
-export default function CategoryGrid() {
+export default function CategoryGrid({ counts = {} }: { counts?: Record<string, number> }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
       <Reveal>
@@ -57,7 +57,7 @@ export default function CategoryGrid() {
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-paper/70">
-                      Shop
+                      {counts[c.slug] != null ? `${counts[c.slug]} pieces` : "Shop"}
                     </p>
                     <p className="font-display text-2xl font-semibold text-paper sm:text-3xl">
                       {c.label}
