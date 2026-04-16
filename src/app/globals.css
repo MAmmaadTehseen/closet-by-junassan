@@ -188,6 +188,15 @@ body {
 }
 .heart-pop { animation: heart-pop 0.4s ease-out; }
 
+@keyframes check-draw {
+  from { stroke-dashoffset: 100; opacity: 0; }
+  to   { stroke-dashoffset: 0;   opacity: 1; }
+}
+.animate-check-draw {
+  stroke-dasharray: 100;
+  animation: check-draw 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -6,6 +6,7 @@ import SortSelect from "@/components/shop/SortSelect";
 import Breadcrumbs from "@/components/product/Breadcrumbs";
 import { fetchProducts } from "@/lib/products";
 import { CATEGORIES, type Category } from "@/lib/types";
+import { siteConfig } from "@/lib/site-config";
 
 export const revalidate = 3600;
 
@@ -95,6 +96,21 @@ export default async function CategoryPage({
         </div>
         <ProductGrid products={products} />
       </div>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: `${siteConfig.url}/` },
+              { "@type": "ListItem", position: 2, name: "Shop", item: `${siteConfig.url}/shop` },
+              { "@type": "ListItem", position: 3, name: cat.label, item: `${siteConfig.url}/category/${slug}` },
+            ],
+          }),
+        }}
+      />
     </>
   );
 }

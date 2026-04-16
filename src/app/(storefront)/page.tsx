@@ -12,18 +12,24 @@ import { fetchProducts } from "@/lib/products";
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [newArrivals, under2k, trending, limited] = await Promise.all([
+  const [newArrivals, under2k, trending, limited, all] = await Promise.all([
     fetchProducts({ tag: "new", limit: 8 }),
     fetchProducts({ maxPrice: 2000, limit: 8 }),
     fetchProducts({ tag: "trending", limit: 8 }),
     fetchProducts({ tag: "limited", limit: 8 }),
+    fetchProducts({ limit: 200 }),
   ]);
+
+  const categoryCounts: Record<string, number> = {};
+  for (const p of all) {
+    categoryCounts[p.category] = (categoryCounts[p.category] ?? 0) + 1;
+  }
 
   return (
     <>
       <Hero />
       <InstagramMosaic products={newArrivals} />
-      <CategoryGrid />
+      <CategoryGrid counts={categoryCounts} />
       <ProductRail
         eyebrow="03 · Best for your rupee"
         title="Under 2000 PKR ⭐"

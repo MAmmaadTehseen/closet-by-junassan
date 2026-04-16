@@ -10,6 +10,7 @@ import { createOrder } from "@/lib/orders";
 import { PK_CITIES } from "@/lib/cities-pk";
 import { PHONE_RE, normalizePhone } from "@/lib/validators";
 import { siteConfig } from "@/lib/site-config";
+import { getDeliveryWindow } from "@/lib/delivery";
 import { toast } from "@/components/ui/Toaster";
 
 const STORAGE_KEY = "closet-checkout-draft";
@@ -217,6 +218,7 @@ export default function CheckoutForm() {
               <Review label="Address" value={draft.address} />
               {draft.notes && <Review label="Notes" value={draft.notes} />}
               <Review label="Payment" value="Cash on Delivery" />
+              <Review label="Est. Delivery" value={getDeliveryWindow()} />
             </dl>
 
             <div className="grid gap-3 sm:grid-cols-3">

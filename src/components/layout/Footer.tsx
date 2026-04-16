@@ -75,6 +75,9 @@ export default function Footer() {
               <li><Link className="text-ink/80 hover:text-ink" href="/contact">Contact</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/contact#faq">FAQ</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/contact">Returns & Sizing</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/track">Track Order</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/privacy">Privacy Policy</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/terms">Terms</Link></li>
             </ul>
           </div>
 
