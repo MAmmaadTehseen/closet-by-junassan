@@ -4,6 +4,7 @@ import { isAdminAuthed, getAdminPassword } from "@/lib/admin-auth";
 import { logoutAction } from "@/lib/admin-actions";
 import { hasAdminEnv } from "@/lib/supabase/admin";
 import { siteConfig } from "@/lib/site-config";
+import Toaster from "@/components/ui/Toaster";
 
 export const metadata = {
   title: "Admin",
@@ -82,6 +83,7 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           )}
           {children}
         </div>
+        <Toaster />
       </div>
     </div>
   );

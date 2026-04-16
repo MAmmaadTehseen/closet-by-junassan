@@ -8,6 +8,9 @@ import { hasAdminEnv } from "@/lib/supabase/admin";
 import { updateProduct, applyBulkDiscount, clearBulkDiscount } from "@/lib/admin-actions";
 import { CATEGORIES } from "@/lib/types";
 import { formatPKR } from "@/lib/format";
+import AdminForm from "@/components/admin/AdminForm";
+import SubmitButton from "@/components/admin/SubmitButton";
+import ConfirmButton from "@/components/admin/ConfirmButton";
 
 export default async function AdminProductsPage() {
   if (!(await isAdminAuthed())) redirect("/admin/login");
@@ -33,7 +36,7 @@ export default async function AdminProductsPage() {
             Apply a flat percentage off to all products or a single category. Original prices
             are remembered so you can clear the discount later.
           </p>
-          <form action={applyBulkDiscount} className="flex flex-wrap items-center gap-3">
+          <AdminForm action={applyBulkDiscount} showInline className="flex flex-wrap items-center gap-3">
             <select
               name="category"
               defaultValue=""
@@ -55,11 +58,16 @@ export default async function AdminProductsPage() {
               placeholder="% off"
               className="w-24 rounded-full border border-border bg-paper px-4 py-2 text-xs font-semibold"
             />
-            <button className="rounded-full bg-ink px-5 py-2 text-xs font-semibold uppercase tracking-widest text-paper">
+            <ConfirmButton
+              message="Apply this discount to all matching products?"
+              pendingText="Applying…"
+              className="rounded-full bg-ink px-5 py-2 text-xs font-semibold uppercase tracking-widest text-paper disabled:opacity-60"
+            >
               Apply
-            </button>
-          </form>
-          <form action={clearBulkDiscount} className="mt-3 flex flex-wrap items-center gap-3">
+            </ConfirmButton>
+          </AdminForm>
+
+          <AdminForm action={clearBulkDiscount} showInline className="mt-3 flex flex-wrap items-center gap-3">
             <select
               name="category"
               defaultValue=""
@@ -72,10 +80,14 @@ export default async function AdminProductsPage() {
                 </option>
               ))}
             </select>
-            <button className="rounded-full border border-ink px-5 py-2 text-xs font-semibold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper">
+            <ConfirmButton
+              message="Clear all discounts from matching products? This will restore original prices."
+              pendingText="Clearing…"
+              className="rounded-full border border-ink px-5 py-2 text-xs font-semibold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper disabled:opacity-60"
+            >
               Clear discounts
-            </button>
-          </form>
+            </ConfirmButton>
+          </AdminForm>
         </section>
       )}
 
@@ -96,7 +108,7 @@ export default async function AdminProductsPage() {
                 : 0;
             return (
               <li key={p.id} className="px-5 py-4">
-                <form
+                <AdminForm
                   action={updateProduct}
                   className="grid items-center gap-3 lg:grid-cols-[60px_1.4fr_110px_130px_110px_80px]"
                 >
@@ -126,7 +138,7 @@ export default async function AdminProductsPage() {
                     defaultValue={p.price_pkr}
                     min="0"
                     disabled={!editable}
-                    className="rounded-lg border border-border bg-paper px-3 py-2 text-sm"
+                    className="rounded-lg border border-border bg-paper px-3 py-2 text-sm disabled:opacity-50"
                   />
                   <label className="block lg:hidden">
                     <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Was</span>
@@ -138,7 +150,7 @@ export default async function AdminProductsPage() {
                     min="0"
                     placeholder="—"
                     disabled={!editable}
-                    className="rounded-lg border border-border bg-paper px-3 py-2 text-sm"
+                    className="rounded-lg border border-border bg-paper px-3 py-2 text-sm disabled:opacity-50"
                   />
                   <label className="block lg:hidden">
                     <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stock</span>
@@ -149,16 +161,16 @@ export default async function AdminProductsPage() {
                     defaultValue={p.stock}
                     min="0"
                     disabled={!editable}
-                    className="rounded-lg border border-border bg-paper px-3 py-2 text-sm"
+                    className="rounded-lg border border-border bg-paper px-3 py-2 text-sm disabled:opacity-50"
                   />
                   <div className="flex items-center gap-2">
-                    <button
-                      type="submit"
+                    <SubmitButton
                       disabled={!editable}
+                      pendingText="…"
                       className="rounded-full bg-ink px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-paper disabled:opacity-50"
                     >
                       Save
-                    </button>
+                    </SubmitButton>
                     <Link
                       href={`/product/${p.slug}`}
                       target="_blank"
@@ -171,7 +183,7 @@ export default async function AdminProductsPage() {
                   <p className="col-span-full text-right text-[10px] text-muted-foreground lg:hidden">
                     Current: {formatPKR(p.price_pkr)} · Stock {p.stock}
                   </p>
-                </form>
+                </AdminForm>
               </li>
             );
           })}
