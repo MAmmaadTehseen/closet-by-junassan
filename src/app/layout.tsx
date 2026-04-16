@@ -46,6 +46,16 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   formatDetection: { telephone: false },
+  manifest: "/manifest.json",
+  other: {
+    "theme-color": "#0a0a0a",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+  },
+  icons: {
+    icon: "/icons/icon.svg",
+    apple: "/icons/icon-192.png",
+  },
 };
 
 export default function RootLayout({

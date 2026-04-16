@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Share2, Copy, Check, MessageCircle, Eye } from "lucide-react";
 import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
+import SizeGuideModal from "./SizeGuideModal";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
@@ -127,6 +128,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 {s}
               </button>
             ))}
+          </div>
+          <div className="mt-3">
+            <SizeGuideModal category={product.category} />
           </div>
         </div>
       )}
