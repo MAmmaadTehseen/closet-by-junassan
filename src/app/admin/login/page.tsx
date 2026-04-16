@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthed, getAdminPassword } from "@/lib/admin-auth";
-import { loginAction } from "@/lib/admin-actions";
 import { ShieldCheck } from "lucide-react";
+import LoginForm from "@/components/admin/LoginForm";
 
 export default async function AdminLoginPage() {
   if (!getAdminPassword()) {
@@ -23,25 +23,7 @@ export default async function AdminLoginPage() {
         <p className="mt-1 text-center text-xs text-muted-foreground">
           Enter the password to manage products and orders.
         </p>
-        <form action={loginAction} className="mt-8 space-y-4">
-          <label className="block">
-            <span className="sr-only">Password</span>
-            <input
-              type="password"
-              name="password"
-              autoFocus
-              required
-              placeholder="••••••••"
-              className="w-full rounded-xl border border-border bg-paper px-4 py-3 text-sm focus:border-ink focus:outline-none"
-            />
-          </label>
-          <button
-            type="submit"
-            className="w-full rounded-full bg-ink py-3 text-xs font-semibold uppercase tracking-widest text-paper transition hover:opacity-90"
-          >
-            Unlock
-          </button>
-        </form>
+        <LoginForm />
       </div>
     </div>
   );

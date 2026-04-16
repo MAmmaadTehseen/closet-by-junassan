@@ -3,6 +3,9 @@ import { isAdminAuthed } from "@/lib/admin-auth";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { updateOrderStatus } from "@/lib/admin-actions";
 import { formatPKR } from "@/lib/format";
+import AdminForm from "@/components/admin/AdminForm";
+import SubmitButton from "@/components/admin/SubmitButton";
+import { siteConfig } from "@/lib/site-config";
 
 interface OrderRow {
   id: string;
@@ -126,7 +129,7 @@ export default async function AdminOrdersPage() {
 
               <div>
                 <p className="eyebrow mb-3">Update status</p>
-                <form action={updateOrderStatus} className="space-y-3">
+                <AdminForm action={updateOrderStatus} className="space-y-3">
                   <input type="hidden" name="id" value={o.id} />
                   <select
                     name="status"
@@ -139,13 +142,16 @@ export default async function AdminOrdersPage() {
                       </option>
                     ))}
                   </select>
-                  <button className="w-full rounded-full bg-ink py-2.5 text-xs font-semibold uppercase tracking-widest text-paper">
+                  <SubmitButton
+                    pendingText="Saving…"
+                    className="w-full rounded-full bg-ink py-2.5 text-xs font-semibold uppercase tracking-widest text-paper disabled:opacity-60"
+                  >
                     Save
-                  </button>
-                </form>
+                  </SubmitButton>
+                </AdminForm>
 
                 <a
-                  href={`https://wa.me/${o.phone.replace(/^0/, "92")}?text=${encodeURIComponent(`Hi ${o.full_name}, this is ${`Closet by Junassan`}. Your order ${o.public_code ?? ""} is being processed.`)}`}
+                  href={`https://wa.me/${o.phone.replace(/^0/, "92")}?text=${encodeURIComponent(`Hi ${o.full_name}, this is ${siteConfig.name}. Your order ${o.public_code ?? ""} is being processed.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-3 block rounded-full border border-ink py-2.5 text-center text-xs font-semibold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper"
