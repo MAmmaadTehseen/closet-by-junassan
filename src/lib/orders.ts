@@ -11,13 +11,13 @@ import { SEED_PRODUCTS } from "./seed-data";
 import type { CheckoutPayload } from "./order-types";
 
 /**
- * Trusted server-side order creation.
- * Validates & normalizes input, enforces honeypot, rate limit, idempotency,
- * then calls the atomic Supabase RPC (with trusted prices and stock).
- * Throws a plain Error with a message starting with "ORDER_ERROR:" for UI
- * consumption when validation/business rules fail.
+ * Server action for order creation.
+ * Returns `{ error }` on validation / business failure.
+ * Calls `redirect()` on success (never returns normally on success).
  */
-export async function createOrder(payload: CheckoutPayload): Promise<void> {
+export async function createOrder(
+  payload: CheckoutPayload,
+): Promise<{ error: string } | never> {
   const hdrs = await headers();
   const ua = hdrs.get("user-agent") ?? "";
   const ip =
@@ -39,7 +39,7 @@ export async function createOrder(payload: CheckoutPayload): Promise<void> {
 
   // Rate limit: 5 orders per 10 minutes per client fingerprint.
   if (!rateLimit(`order:${ipHash}`, 5, 10 * 60 * 1000)) {
-    throw new Error("ORDER_ERROR: Too many attempts. Please try again in a few minutes.");
+    return { error: "Too many attempts. Please try again in a few minutes." };
   }
 
   const validation = validateCheckout({
@@ -52,7 +52,7 @@ export async function createOrder(payload: CheckoutPayload): Promise<void> {
   });
   if (!validation.ok || !validation.data) {
     const first = Object.values(validation.errors ?? { _: "Invalid order." })[0];
-    throw new Error(`ORDER_ERROR: ${first}`);
+    return { error: first };
   }
 
   const v = validation.data;
@@ -83,20 +83,20 @@ export async function createOrder(payload: CheckoutPayload): Promise<void> {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes("out_of_stock")) {
-        throw new Error("ORDER_ERROR: Sorry — one of your items just sold out.");
+        return { error: "Sorry — one of your items just sold out." };
       }
       if (msg.includes("product_not_found")) {
-        throw new Error("ORDER_ERROR: One of the products is no longer available.");
+        return { error: "One of the products is no longer available." };
       }
       console.error("[createOrder] rpc failed:", msg);
-      // Fall through to seed-log path.
+      // Fall through — still redirect as success (order logged server-side).
     }
   } else {
     // No Supabase — validate against seed stock to keep dev UX consistent.
     for (const it of v.items) {
       const seed = SEED_PRODUCTS.find((p) => p.id === it.product_id);
-      if (!seed) throw new Error("ORDER_ERROR: Product no longer available.");
-      if (seed.stock < it.quantity) throw new Error("ORDER_ERROR: Out of stock.");
+      if (!seed) return { error: "Product no longer available." };
+      if (seed.stock < it.quantity) return { error: "Out of stock." };
     }
     console.log("[createOrder] (seed mode)", { code: orderCode, ...v });
   }

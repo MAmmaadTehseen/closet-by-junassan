@@ -97,24 +97,20 @@ export default function CheckoutForm() {
     ) as HTMLInputElement | null;
 
     startTransition(async () => {
-      try {
-        await createOrder({
-          full_name: draft.full_name,
-          phone: normalizePhone(draft.phone),
-          city: draft.city,
-          address: draft.address,
-          notes: draft.notes || undefined,
-          items,
-          honeypot: honeypot?.value ?? "",
-          idempotencyKey: idempotencyKey.current,
-        });
-      } catch (err) {
-        // Re-throw redirect signals so Next.js can navigate.
-        if (err && typeof err === "object" && "digest" in err) throw err;
-        const raw = err instanceof Error ? err.message : "Something went wrong";
-        const msg = raw.replace(/^ORDER_ERROR:\s*/, "");
-        toast.error(msg);
-        setErrors({ _form: msg });
+      const result = await createOrder({
+        full_name: draft.full_name,
+        phone: normalizePhone(draft.phone),
+        city: draft.city,
+        address: draft.address,
+        notes: draft.notes || undefined,
+        items,
+        honeypot: honeypot?.value ?? "",
+        idempotencyKey: idempotencyKey.current,
+      });
+      // If we reach here, the server returned an error (success redirects instead).
+      if (result?.error) {
+        toast.error(result.error);
+        setErrors({ _form: result.error });
       }
     });
   };
