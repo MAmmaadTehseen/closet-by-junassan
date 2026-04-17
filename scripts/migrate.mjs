@@ -8,6 +8,11 @@
  *   SUPABASE_DB_URL  postgres connection string (required — when unset,
  *                    the script is a no-op so local builds still work)
  *
+ * On Vercel, this MUST be the Supabase "Session pooler" URL (IPv4). The
+ * direct connection (db.[ref].supabase.co) is IPv6-only and fails with
+ * ENETUNREACH on Vercel build runners.
+ *   Session pooler: postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
+ *
  * Idempotent: safe to run repeatedly. Transactional per file.
  */
 import { readdir, readFile } from "node:fs/promises";
