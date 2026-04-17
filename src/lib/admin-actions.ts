@@ -28,6 +28,174 @@ async function requireAdmin(): Promise<ActionResult | null> {
   return null;
 }
 
+// ─── Product full CRUD ────────────────────────────────────────────────────────
+
+function collectImages(formData: FormData): string[] {
+  return [0, 1, 2, 3, 4]
+    .map((i) => String(formData.get(`image_${i}`) ?? "").trim())
+    .filter(Boolean);
+}
+
+function collectTags(formData: FormData): string[] {
+  return ["new", "trending", "limited"].filter(
+    (t) => formData.get(`tag_${t}`) === "on",
+  );
+}
+
+export async function createProduct(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const name        = String(formData.get("name")        ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const brand       = String(formData.get("brand")       ?? "").trim();
+  const category    = String(formData.get("category")    ?? "").trim();
+  const size        = String(formData.get("size")        ?? "").trim();
+  const condition   = String(formData.get("condition")   ?? "good").trim();
+  const price_pkr   = Number(formData.get("price_pkr")   ?? 0);
+  const stock       = Number(formData.get("stock")       ?? 0);
+  const fabric      = String(formData.get("fabric")      ?? "").trim() || null;
+  const measurements = String(formData.get("measurements") ?? "").trim() || null;
+  const care        = String(formData.get("care")        ?? "").trim() || null;
+  const images      = collectImages(formData);
+  const tags        = collectTags(formData);
+
+  if (!name)                                         return { ok: false, error: "Product name is required." };
+  if (!brand)                                        return { ok: false, error: "Brand is required." };
+  if (!category)                                     return { ok: false, error: "Category is required." };
+  if (!Number.isFinite(price_pkr) || price_pkr <= 0) return { ok: false, error: "A valid price is required." };
+  if (!Number.isFinite(stock) || stock < 0)          return { ok: false, error: "Stock must be 0 or more." };
+  if (images.length === 0)                           return { ok: false, error: "At least one image URL is required." };
+
+  const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const suffix   = Math.random().toString(36).slice(2, 7);
+  const slug     = `${baseSlug}-${suffix}`;
+
+  const row: Record<string, unknown> = {
+    slug, name, description, brand, category,
+    price_pkr: Math.round(price_pkr),
+    stock: Math.floor(stock),
+    size, condition, images, tags, fabric, measurements, care,
+  };
+
+  const orig = formData.get("original_price_pkr");
+  if (orig && String(orig).trim()) {
+    const n = Number(orig);
+    if (Number.isFinite(n) && n > 0) row.original_price_pkr = Math.round(n);
+  }
+  const origStock = formData.get("original_stock");
+  if (origStock && String(origStock).trim()) {
+    const n = Number(origStock);
+    if (Number.isFinite(n) && n > 0) row.original_stock = Math.floor(n);
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("products").insert(row);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Create failed." };
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
+  redirect("/admin/products");
+}
+
+export async function updateProductFull(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const id          = String(formData.get("id")          ?? "");
+  const name        = String(formData.get("name")        ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const brand       = String(formData.get("brand")       ?? "").trim();
+  const category    = String(formData.get("category")    ?? "").trim();
+  const size        = String(formData.get("size")        ?? "").trim();
+  const condition   = String(formData.get("condition")   ?? "good").trim();
+  const price_pkr   = Number(formData.get("price_pkr")   ?? 0);
+  const stock       = Number(formData.get("stock")       ?? 0);
+  const fabric      = String(formData.get("fabric")      ?? "").trim() || null;
+  const measurements = String(formData.get("measurements") ?? "").trim() || null;
+  const care        = String(formData.get("care")        ?? "").trim() || null;
+  const images      = collectImages(formData);
+  const tags        = collectTags(formData);
+
+  if (!id)                                           return { ok: false, error: "Missing product ID." };
+  if (!name)                                         return { ok: false, error: "Product name is required." };
+  if (!brand)                                        return { ok: false, error: "Brand is required." };
+  if (!category)                                     return { ok: false, error: "Category is required." };
+  if (!Number.isFinite(price_pkr) || price_pkr <= 0) return { ok: false, error: "A valid price is required." };
+  if (!Number.isFinite(stock) || stock < 0)          return { ok: false, error: "Stock must be 0 or more." };
+  if (images.length === 0)                           return { ok: false, error: "At least one image URL is required." };
+
+  const patch: Record<string, unknown> = {
+    name, description, brand, category,
+    price_pkr: Math.round(price_pkr),
+    stock: Math.floor(stock),
+    size, condition, images, tags, fabric, measurements, care,
+    original_price_pkr: null,
+    original_stock: null,
+  };
+
+  const orig = formData.get("original_price_pkr");
+  if (orig && String(orig).trim()) {
+    const n = Number(orig);
+    if (Number.isFinite(n) && n > 0) patch.original_price_pkr = Math.round(n);
+  }
+  const origStock = formData.get("original_stock");
+  if (origStock && String(origStock).trim()) {
+    const n = Number(origStock);
+    if (Number.isFinite(n) && n > 0) patch.original_stock = Math.floor(n);
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("products").update(patch).eq("id", id);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
+  redirect("/admin/products");
+}
+
+export async function deleteProduct(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "Missing product ID." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Delete failed." };
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
+  return { ok: true, message: "Product deleted." };
+}
+
+// ─── Product inline price/stock edit ─────────────────────────────────────────
+
 export async function updateProduct(
   _prev: ActionResult | null,
   formData: FormData,
