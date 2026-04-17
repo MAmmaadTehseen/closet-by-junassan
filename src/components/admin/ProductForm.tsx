@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import type { ActionResult } from "@/lib/admin-actions";
 import type { Product } from "@/lib/types";
 import type { CategoryDef } from "@/lib/categories";
+import ImageUploader from "./ImageUploader";
 
 type ProductAction = (
   _prev: ActionResult | null,
@@ -151,22 +152,9 @@ export default function ProductForm({
       </fieldset>
 
       {/* Images */}
-      <fieldset className="rounded-2xl border border-border bg-paper p-6 space-y-4">
+      <fieldset className="rounded-2xl border border-border bg-paper p-6 space-y-3">
         <legend className="px-1 eyebrow">Images</legend>
-        <p className="text-xs text-muted-foreground">Paste direct image URLs. First image is the cover.</p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <Field key={i} label={i === 0 ? "Image 1 (cover) *" : `Image ${i + 1}`}>
-              <input
-                type="url"
-                name={`image_${i}`}
-                defaultValue={product?.images[i] ?? ""}
-                placeholder="https://…"
-                className={input}
-              />
-            </Field>
-          ))}
-        </div>
+        <ImageUploader initialImages={product?.images ?? []} />
       </fieldset>
 
       {/* Tags */}

@@ -6,6 +6,50 @@ import { isAdminAuthed, loginAdmin, logoutAdmin } from "./admin-auth";
 import { createAdminClient, hasAdminEnv } from "./supabase/admin";
 
 export type ActionResult = { ok: true; message: string } | { ok: false; error: string };
+export type UploadResult = { url: string } | { error: string };
+
+const STORAGE_BUCKET = "product-images";
+
+/** Upload a single image to Supabase Storage. Called directly from client components. */
+export async function uploadProductImage(formData: FormData): Promise<UploadResult> {
+  if (!(await isAdminAuthed())) return { error: "Unauthorized." };
+  if (!hasAdminEnv()) return { error: "Storage not configured." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
+  if (file.size > 5 * 1024 * 1024) return { error: "File exceeds 5 MB limit." };
+
+  const ext      = (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const fileName = `${crypto.randomUUID()}.${ext}`;
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(fileName, file, { contentType: file.type, upsert: false });
+
+    if (error) return { error: error.message };
+
+    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+    return { url: data.publicUrl };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Upload failed." };
+  }
+}
+
+/** Delete an image from Supabase Storage by its full public URL. */
+export async function deleteProductImage(url: string): Promise<void> {
+  if (!(await isAdminAuthed()) || !hasAdminEnv()) return;
+  try {
+    const supabase = createAdminClient();
+    const baseUrl  = supabase.storage.from(STORAGE_BUCKET).getPublicUrl("").data.publicUrl;
+    if (!url.startsWith(baseUrl)) return; // not our bucket
+    const path = url.replace(baseUrl, "");
+    await supabase.storage.from(STORAGE_BUCKET).remove([path]);
+  } catch {
+    // best-effort, don't throw
+  }
+}
 
 export async function loginAction(
   _prev: ActionResult | null,
