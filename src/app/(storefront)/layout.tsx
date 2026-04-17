@@ -2,18 +2,22 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ClientShell from "@/components/app-shell/ClientShell";
 import { fetchProducts } from "@/lib/products";
+import { fetchCategories } from "@/lib/categories";
 
 export default async function StorefrontLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const products = await fetchProducts({ limit: 60 });
+  const [products, categories] = await Promise.all([
+    fetchProducts({ limit: 60 }),
+    fetchCategories(),
+  ]);
   return (
     <>
-      <Header />
+      <Header categories={categories} />
       <main className="flex-1">{children}</main>
-      <Footer />
+      <Footer categories={categories} />
       <ClientShell products={products} />
     </>
   );

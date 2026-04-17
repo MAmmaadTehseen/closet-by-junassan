@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Boxes, ClipboardList, LogOut, LayoutDashboard } from "lucide-react";
+import { Boxes, ClipboardList, LogOut, LayoutDashboard, Tag } from "lucide-react";
 import { isAdminAuthed, getAdminPassword } from "@/lib/admin-auth";
 import { logoutAction } from "@/lib/admin-actions";
 import { hasAdminEnv } from "@/lib/supabase/admin";
@@ -49,6 +49,7 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 space-y-1 p-4 text-sm">
           <AdminLink href="/admin" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" />
           <AdminLink href="/admin/products" icon={<Boxes className="h-4 w-4" />} label="Products" />
+          <AdminLink href="/admin/categories" icon={<Tag className="h-4 w-4" />} label="Categories" />
           <AdminLink href="/admin/orders" icon={<ClipboardList className="h-4 w-4" />} label="Orders" />
         </nav>
         <form action={logoutAction} className="border-t border-border p-4">

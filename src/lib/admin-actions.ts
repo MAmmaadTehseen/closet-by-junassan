@@ -141,6 +141,108 @@ export async function clearBulkDiscount(
   }
 }
 
+// ─── Category CRUD ────────────────────────────────────────────────────────────
+
+export async function createCategory(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const label = String(formData.get("label") ?? "").trim();
+  const slug  = String(formData.get("slug")  ?? "").trim().toLowerCase();
+  const parent_slug  = String(formData.get("parent_slug")  ?? "").trim() || null;
+  const cover_image  = String(formData.get("cover_image")  ?? "").trim() || null;
+  const sort_order   = Number(formData.get("sort_order")   ?? 0);
+
+  if (!label) return { ok: false, error: "Category name is required." };
+  if (!slug || !/^[a-z0-9-]+$/.test(slug))
+    return { ok: false, error: "Slug must use lowercase letters, numbers, and hyphens only." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("categories").insert({
+      slug,
+      label,
+      parent_slug,
+      cover_image,
+      sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+    });
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Create failed." };
+  }
+
+  revalidatePath("/admin/categories");
+  revalidatePath("/");
+  revalidatePath("/shop");
+  return { ok: true, message: `Category "${label}" created.` };
+}
+
+export async function updateCategory(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const slug        = String(formData.get("slug")        ?? "");
+  const label       = String(formData.get("label")       ?? "").trim();
+  const parent_slug = String(formData.get("parent_slug") ?? "").trim() || null;
+  const cover_image = String(formData.get("cover_image") ?? "").trim() || null;
+  const sort_order  = Number(formData.get("sort_order")  ?? 0);
+
+  if (!slug || !label) return { ok: false, error: "Slug and label are required." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("categories")
+      .update({
+        label,
+        parent_slug,
+        cover_image,
+        sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+      })
+      .eq("slug", slug);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
+  }
+
+  revalidatePath("/admin/categories");
+  revalidatePath("/");
+  revalidatePath("/shop");
+  return { ok: true, message: `Category "${label}" updated.` };
+}
+
+export async function deleteCategory(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const slug = String(formData.get("slug") ?? "");
+  if (!slug) return { ok: false, error: "Missing category slug." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("categories").delete().eq("slug", slug);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Delete failed." };
+  }
+
+  revalidatePath("/admin/categories");
+  revalidatePath("/");
+  revalidatePath("/shop");
+  return { ok: true, message: "Category deleted." };
+}
+
+// ─── Order Status ─────────────────────────────────────────────────────────────
+
 export async function updateOrderStatus(
   _prev: ActionResult | null,
   formData: FormData,

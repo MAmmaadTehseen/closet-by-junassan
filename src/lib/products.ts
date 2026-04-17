@@ -1,9 +1,9 @@
 import { SEED_PRODUCTS } from "./seed-data";
 import { createClient, hasSupabaseEnv } from "./supabase/server";
-import type { Category, Product } from "./types";
+import type { Product } from "./types";
 
 export interface ProductQuery {
-  category?: Category;
+  category?: string;
   minPrice?: number;
   maxPrice?: number;
   size?: string;

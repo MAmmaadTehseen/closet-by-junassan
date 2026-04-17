@@ -1,11 +1,13 @@
-export type Category = "men" | "women" | "kids" | "shoes" | "bags";
+/** Category slug — now a plain string backed by the `categories` DB table. */
+export type Category = string;
 
-export const CATEGORIES: { slug: Category; label: string }[] = [
-  { slug: "men", label: "Men" },
+/** Static fallback used by components that need a synchronous category list. */
+export const CATEGORIES: { slug: string; label: string }[] = [
+  { slug: "men",   label: "Men" },
   { slug: "women", label: "Women" },
-  { slug: "kids", label: "Kids" },
+  { slug: "kids",  label: "Kids" },
   { slug: "shoes", label: "Shoes" },
-  { slug: "bags", label: "Bags" },
+  { slug: "bags",  label: "Bags" },
 ];
 
 export const SIZES = ["S", "M", "L", "XL"] as const;
@@ -19,7 +21,7 @@ export interface Product {
   name: string;
   description: string;
   brand: string;
-  category: Category;
+  category: string;
   price_pkr: number;
   original_price_pkr?: number;
   size: string;

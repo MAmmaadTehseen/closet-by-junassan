@@ -8,7 +8,7 @@ import FilterPills from "@/components/shop/FilterPills";
 import ProductGrid from "@/components/product/ProductGrid";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import { fetchProducts } from "@/lib/products";
-import type { Category } from "@/lib/types";
+import { fetchCategories } from "@/lib/categories";
 
 export const revalidate = 3600;
 
@@ -28,7 +28,7 @@ type SP = Promise<{
 
 async function ShopResults({ sp }: { sp: Awaited<SP> }) {
   const products = await fetchProducts({
-    category: (sp.category as Category) || undefined,
+    category: sp.category || undefined,
     size: sp.size,
     minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
     maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
@@ -59,15 +59,17 @@ async function ShopResults({ sp }: { sp: Awaited<SP> }) {
 export default async function ShopPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
 
-  // Count results for the toolbar (single fetch, not duplicated)
-  const allForCount = await fetchProducts({
-    category: (sp.category as Category) || undefined,
-    size: sp.size,
-    minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
-    maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
-    sort: "newest",
-    q: sp.q,
-  });
+  const [allForCount, categories] = await Promise.all([
+    fetchProducts({
+      category: sp.category || undefined,
+      size: sp.size,
+      minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
+      maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
+      sort: "newest",
+      q: sp.q,
+    }),
+    fetchCategories(),
+  ]);
   const count = allForCount.length;
   const isFiltered = !!(sp.category || sp.size || sp.minPrice || sp.maxPrice || sp.q);
 
@@ -87,7 +89,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SP }) {
       </div>
 
       <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-paper p-3 sm:rounded-full sm:px-5">
-        <MobileFiltersDrawer resultCount={count} />
+        <MobileFiltersDrawer resultCount={count} categories={categories} />
         <p className="hidden text-xs uppercase tracking-widest text-muted-foreground lg:inline">
           {count} {count === 1 ? "result" : "results"}
         </p>
@@ -101,7 +103,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SP }) {
 
       <div className="grid gap-10 lg:grid-cols-[240px_1fr]">
         <div className="hidden lg:block">
-          <Filters />
+          <Filters categories={categories} />
         </div>
         <Suspense fallback={<ProductGridSkeleton count={12} />}>
           <ShopResults sp={sp} />

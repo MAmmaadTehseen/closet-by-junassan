@@ -8,17 +8,16 @@ import { useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useUi } from "@/lib/ui-store";
 import { siteConfig } from "@/lib/site-config";
-import { CATEGORIES } from "@/lib/types";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
+import type { CategoryDef } from "@/lib/categories";
 
-const NAV_LINKS = [
-  { href: "/shop", label: "Shop" },
-  ...CATEGORIES.map((c) => ({ href: `/category/${c.slug}`, label: c.label })),
-  { href: "/deals", label: "Deals" },
-];
-
-export default function Header() {
+export default function Header({ categories = [] }: { categories?: CategoryDef[] }) {
+  const NAV_LINKS = [
+    { href: "/shop", label: "Shop" },
+    ...categories.map((c) => ({ href: `/category/${c.slug}`, label: c.label })),
+    { href: "/deals", label: "Deals" },
+  ];
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);

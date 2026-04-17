@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { X } from "lucide-react";
-import { CATEGORIES, SIZES } from "@/lib/types";
+import { SIZES } from "@/lib/types";
+import type { CategoryDef } from "@/lib/categories";
 
 const PRICE_RANGES = [
   { label: "All", min: "", max: "" },
@@ -13,7 +14,13 @@ const PRICE_RANGES = [
   { label: "3500+", min: "3500", max: "" },
 ];
 
-export default function Filters({ compact = false }: { compact?: boolean }) {
+export default function Filters({
+  compact = false,
+  categories = [],
+}: {
+  compact?: boolean;
+  categories?: CategoryDef[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -77,7 +84,7 @@ export default function Filters({ compact = false }: { compact?: boolean }) {
         <button onClick={() => update({ category: "" })} className={chip(current.category === "")}>
           All
         </button>
-        {CATEGORIES.map((c) => (
+        {categories.map((c) => (
           <button
             key={c.slug}
             onClick={() => update({ category: c.slug })}
