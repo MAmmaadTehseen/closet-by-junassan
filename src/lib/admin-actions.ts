@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdminAuthed, loginAdmin, logoutAdmin } from "./admin-auth";
 import { createAdminClient, hasAdminEnv } from "./supabase/admin";
+import { sendStatusUpdate } from "./email";
 
 export type ActionResult = { ok: true; message: string } | { ok: false; error: string };
 export type UploadResult = { url: string } | { error: string };
@@ -473,10 +474,176 @@ export async function updateOrderStatus(
     const supabase = createAdminClient();
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return { ok: false, error: error.message };
+
+    // Fire email notification (best-effort, non-blocking).
+    const { data: order } = await supabase
+      .from("orders")
+      .select("email,full_name,phone,public_code")
+      .eq("id", id)
+      .single();
+    if (order?.email && order.public_code) {
+      void sendStatusUpdate({
+        email: order.email,
+        firstName: order.full_name?.split(/\s+/)[0] ?? order.full_name ?? "there",
+        code: order.public_code,
+        phone: order.phone,
+        status,
+      });
+    }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
   }
 
   revalidatePath("/admin/orders");
   return { ok: true, message: `Order status updated to "${status}".` };
+}
+
+// ─── Drops (homepage Stories) ────────────────────────────────────────────────
+
+export async function createDrop(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const title = String(formData.get("title") ?? "").trim();
+  const subtitle = String(formData.get("subtitle") ?? "").trim() || null;
+  const cover_image = String(formData.get("cover_image") ?? "").trim();
+  const cta_label = String(formData.get("cta_label") ?? "").trim() || null;
+  const cta_href = String(formData.get("cta_href") ?? "").trim() || null;
+  const sort_order = Number(formData.get("sort_order") ?? 0);
+  const active = formData.get("active") === "on";
+
+  if (!title) return { ok: false, error: "Title is required." };
+  if (!cover_image) return { ok: false, error: "Cover image is required." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("drops").insert({
+      title,
+      subtitle,
+      cover_image,
+      cta_label,
+      cta_href,
+      sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+      active,
+    });
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Create failed." };
+  }
+
+  revalidatePath("/admin/drops");
+  revalidatePath("/");
+  return { ok: true, message: "Drop created." };
+}
+
+export async function updateDrop(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const subtitle = String(formData.get("subtitle") ?? "").trim() || null;
+  const cover_image = String(formData.get("cover_image") ?? "").trim();
+  const cta_label = String(formData.get("cta_label") ?? "").trim() || null;
+  const cta_href = String(formData.get("cta_href") ?? "").trim() || null;
+  const sort_order = Number(formData.get("sort_order") ?? 0);
+  const active = formData.get("active") === "on";
+
+  if (!id || !title || !cover_image) {
+    return { ok: false, error: "ID, title and cover image are required." };
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("drops")
+      .update({
+        title,
+        subtitle,
+        cover_image,
+        cta_label,
+        cta_href,
+        sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+        active,
+      })
+      .eq("id", id);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
+  }
+
+  revalidatePath("/admin/drops");
+  revalidatePath("/");
+  return { ok: true, message: "Drop updated." };
+}
+
+export async function deleteDrop(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "Missing drop ID." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("drops").delete().eq("id", id);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Delete failed." };
+  }
+
+  revalidatePath("/admin/drops");
+  revalidatePath("/");
+  return { ok: true, message: "Drop deleted." };
+}
+
+// ─── Reviews (customer-submitted) ────────────────────────────────────────────
+
+export async function approveReview(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+  const id = String(formData.get("id") ?? "");
+  const approved = formData.get("approved") === "true";
+  if (!id) return { ok: false, error: "Missing review ID." };
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("reviews").update({ approved }).eq("id", id);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
+  }
+  revalidatePath("/admin/reviews");
+  revalidatePath("/product");
+  return { ok: true, message: approved ? "Review approved." : "Review hidden." };
+}
+
+export async function deleteReview(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "Missing review ID." };
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Delete failed." };
+  }
+  revalidatePath("/admin/reviews");
+  return { ok: true, message: "Review deleted." };
 }

@@ -10,6 +10,7 @@ import { useUi } from "@/lib/ui-store";
 import { siteConfig } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import type { CategoryDef } from "@/lib/categories";
 
 export default function Header({ categories = [] }: { categories?: CategoryDef[] }) {
@@ -89,6 +90,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
             >
               <Search className="h-5 w-5" />
             </button>
+            <ThemeToggle />
             <Link
               href="/wishlist"
               className="relative hidden rounded-full p-2.5 text-ink hover:bg-cream focus-ring sm:inline-flex"
@@ -102,6 +104,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
               )}
             </Link>
             <button
+              id="cart-target"
               onClick={openCart}
               className="relative rounded-full p-2.5 text-ink hover:bg-cream focus-ring"
               aria-label="Cart"

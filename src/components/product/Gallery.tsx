@@ -2,12 +2,22 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import GalleryLightbox from "./GalleryLightbox";
 
-export default function Gallery({ images, alt }: { images: string[]; alt: string }) {
+export default function Gallery({
+  images,
+  alt,
+  transitionName,
+}: {
+  images: string[];
+  alt: string;
+  transitionName?: string;
+}) {
   const [active, setActive] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const [lens, setLens] = useState({ x: 50, y: 50 });
+  const [lightbox, setLightbox] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -50,7 +60,8 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
 
       <div className="relative flex-1">
         <div
-          className="relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden rounded-2xl bg-cream"
+          data-gallery-hero
+          className="relative aspect-4/5 w-full cursor-zoom-in overflow-hidden rounded-2xl bg-cream"
           onMouseMove={onMove}
           onMouseEnter={() => setZoomed(true)}
           onMouseLeave={() => setZoomed(false)}
@@ -67,11 +78,10 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
             className={`select-none object-cover transition-transform duration-500 ${
               zoomed ? "scale-[1.6]" : ""
             }`}
-            style={
-              zoomed
-                ? { transformOrigin: `${lens.x}% ${lens.y}%` }
-                : undefined
-            }
+            style={{
+              ...(zoomed ? { transformOrigin: `${lens.x}% ${lens.y}%` } : {}),
+              ...(active === 0 && transitionName ? { viewTransitionName: transitionName } : {}),
+            }}
           />
         </div>
 
@@ -107,7 +117,23 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
             </div>
           </>
         )}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setLightbox(true);
+            setZoomed(false);
+          }}
+          aria-label="Open full-screen gallery"
+          className="absolute right-3 top-3 rounded-full bg-paper/90 p-2 shadow transition hover:bg-paper"
+        >
+          <Maximize2 className="h-3.5 w-3.5" />
+        </button>
       </div>
+
+      {lightbox && (
+        <GalleryLightbox images={images} initial={active} onClose={() => setLightbox(false)} />
+      )}
     </div>
   );
 }

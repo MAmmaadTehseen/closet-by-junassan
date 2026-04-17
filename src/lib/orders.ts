@@ -8,6 +8,7 @@ import { validateCheckout } from "./validators";
 import { hashKey, rateLimit, rememberIdempotency, seenIdempotency } from "./rate-limit";
 import { shortOrderCode } from "./format";
 import { SEED_PRODUCTS } from "./seed-data";
+import { sendOrderConfirmation } from "./email";
 import type { CheckoutPayload } from "./order-types";
 
 /**
@@ -74,6 +75,29 @@ export async function createOrder(
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
       if (row?.public_code) orderCode = row.public_code;
+
+      // Persist email + fire confirmation (best-effort).
+      const email = payload.email?.trim();
+      if (email && row?.id) {
+        await supabase.from("orders").update({ email }).eq("id", row.id).then(() => {});
+        const total = payload.items.reduce((n, i) => n + i.price_pkr * i.quantity, 0);
+        void sendOrderConfirmation({
+          email,
+          firstName: v.full_name.split(/\s+/)[0] ?? v.full_name,
+          code: orderCode,
+          items: payload.items.map((i) => ({
+            name: i.name,
+            quantity: i.quantity,
+            price_pkr: i.price_pkr,
+            size: i.size,
+          })),
+          total,
+          address: v.address,
+          city: v.city,
+          phone: v.phone,
+        });
+      }
+
       revalidatePath("/shop");
       revalidatePath("/");
       for (const it of v.items) {

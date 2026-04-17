@@ -7,19 +7,22 @@ import EditorNote from "@/components/home/EditorNote";
 import HowCodWorks from "@/components/home/HowCodWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
+import StoriesBar from "@/components/home/StoriesBar";
 import { fetchProducts } from "@/lib/products";
 import { fetchCategories } from "@/lib/categories";
+import { fetchActiveDrops } from "@/lib/drops";
 
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [newArrivals, under2k, trending, limited, all, categories] = await Promise.all([
+  const [newArrivals, under2k, trending, limited, all, categories, drops] = await Promise.all([
     fetchProducts({ tag: "new", limit: 8 }),
     fetchProducts({ maxPrice: 2000, limit: 8 }),
     fetchProducts({ tag: "trending", limit: 8 }),
     fetchProducts({ tag: "limited", limit: 8 }),
     fetchProducts({ limit: 200 }),
     fetchCategories(),
+    fetchActiveDrops(),
   ]);
 
   const categoryCounts: Record<string, number> = {};
@@ -30,6 +33,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
+      <StoriesBar drops={drops} />
       <InstagramMosaic products={newArrivals} />
       <CategoryGrid categories={categories} counts={categoryCounts} />
       <ProductRail

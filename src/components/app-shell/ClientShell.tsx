@@ -10,6 +10,12 @@ import BackToTop from "@/components/ui/BackToTop";
 const SearchPalette = dynamic(() => import("@/components/search/SearchPalette"), {
   ssr: false,
 });
+const SocialProof = dynamic(() => import("@/components/ui/SocialProof"), {
+  ssr: false,
+});
+const ExitIntent = dynamic(() => import("@/components/ui/ExitIntent"), {
+  ssr: false,
+});
 
 export default function ClientShell({ products }: { products: Product[] }) {
   return (
@@ -19,6 +25,8 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <SearchPalette products={products} />
       <RegisterSW />
       <BackToTop />
+      <SocialProof />
+      <ExitIntent />
     </>
   );
 }

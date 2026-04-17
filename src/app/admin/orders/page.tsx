@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Download, Search } from "lucide-react";
 import { isAdminAuthed } from "@/lib/admin-auth";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { updateOrderStatus } from "@/lib/admin-actions";
@@ -31,15 +32,30 @@ interface OrderItemRow {
 
 const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
 type Status = (typeof STATUSES)[number];
+const RANGES = ["all", "today", "7d", "30d"] as const;
+type Range = (typeof RANGES)[number];
 
-type SP = Promise<{ status?: string }>;
+type SP = Promise<{ status?: string; q?: string; range?: string }>;
+
+function buildHref(params: { status?: string; q?: string; range?: string }) {
+  const p = new URLSearchParams();
+  if (params.status && params.status !== "all") p.set("status", params.status);
+  if (params.q) p.set("q", params.q);
+  if (params.range && params.range !== "all") p.set("range", params.range);
+  const qs = p.toString();
+  return qs ? `/admin/orders?${qs}` : "/admin/orders";
+}
 
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SP }) {
   if (!(await isAdminAuthed())) redirect("/admin/login");
 
-  const { status: filterStatus } = await searchParams;
+  const sp = await searchParams;
   const activeStatus: Status | "all" =
-    STATUSES.includes(filterStatus as Status) ? (filterStatus as Status) : "all";
+    STATUSES.includes(sp.status as Status) ? (sp.status as Status) : "all";
+  const search = (sp.q ?? "").trim();
+  const range: Range = (RANGES as readonly string[]).includes(sp.range ?? "")
+    ? (sp.range as Range)
+    : "all";
 
   let orders: OrderRow[] = [];
   const itemsByOrder: Record<string, OrderItemRow[]> = {};
@@ -53,8 +69,20 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         .order("created_at", { ascending: false })
         .limit(200);
 
-      if (activeStatus !== "all") {
-        q = q.eq("status", activeStatus);
+      if (activeStatus !== "all") q = q.eq("status", activeStatus);
+
+      if (range !== "all") {
+        const since = new Date();
+        if (range === "today") since.setHours(0, 0, 0, 0);
+        else if (range === "7d") since.setDate(since.getDate() - 7);
+        else if (range === "30d") since.setDate(since.getDate() - 30);
+        q = q.gte("created_at", since.toISOString());
+      }
+
+      if (search) {
+        q = q.or(
+          `public_code.ilike.%${search}%,full_name.ilike.%${search}%,phone.ilike.%${search}%,city.ilike.%${search}%`,
+        );
       }
 
       const { data } = await q;
@@ -62,10 +90,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
 
       if (orders.length > 0) {
         const ids = orders.map((o) => o.id);
-        const { data: items } = await supabase
-          .from("order_items")
-          .select("*")
-          .in("order_id", ids);
+        const { data: items } = await supabase.from("order_items").select("*").in("order_id", ids);
         for (const it of (items ?? []) as OrderItemRow[]) {
           (itemsByOrder[it.order_id] ??= []).push(it);
         }
@@ -75,22 +100,72 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     }
   }
 
+  const totalSum = orders.reduce((n, o) => n + (o.subtotal_pkr ?? 0), 0);
+
+  const exportHref = (() => {
+    const p = new URLSearchParams();
+    if (activeStatus !== "all") p.set("status", activeStatus);
+    if (search) p.set("q", search);
+    if (range !== "all") p.set("range", range);
+    const qs = p.toString();
+    return qs ? `/admin/orders/export?${qs}` : "/admin/orders/export";
+  })();
+
   return (
     <>
-      <div className="mb-6">
-        <p className="eyebrow">Admin · Operations</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Orders</h1>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {orders.length} {activeStatus === "all" ? "total" : activeStatus} orders · newest first.
-        </p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow">Admin · Operations</p>
+          <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Orders</h1>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {orders.length} {activeStatus === "all" ? "total" : activeStatus} ·{" "}
+            {formatPKR(totalSum)} shown
+          </p>
+        </div>
+        <a
+          href={exportHref}
+          className="inline-flex items-center gap-2 rounded-full border border-ink px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper"
+        >
+          <Download className="h-3.5 w-3.5" /> Export CSV
+        </a>
       </div>
 
-      {/* Status filter tabs */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      {/* Search + range */}
+      <form className="mb-4 flex flex-wrap items-center gap-3" action="/admin/orders" method="get">
+        {activeStatus !== "all" && <input type="hidden" name="status" value={activeStatus} />}
+        {range !== "all" && <input type="hidden" name="range" value={range} />}
+        <div className="relative flex-1 min-w-60">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            name="q"
+            defaultValue={search}
+            placeholder="Search by code, name, phone, or city…"
+            className="w-full rounded-full border border-border bg-paper py-2 pl-9 pr-4 text-sm focus:border-ink focus:outline-none"
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-full bg-ink px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-paper"
+        >
+          Search
+        </button>
+        {search && (
+          <Link
+            href={buildHref({ status: activeStatus, range })}
+            className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-ink"
+          >
+            Clear
+          </Link>
+        )}
+      </form>
+
+      {/* Filter rows */}
+      <div className="mb-2 flex flex-wrap gap-2">
         {(["all", ...STATUSES] as const).map((s) => (
           <Link
             key={s}
-            href={s === "all" ? "/admin/orders" : `/admin/orders?status=${s}`}
+            href={buildHref({ status: s, q: search, range })}
             className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest transition ${
               activeStatus === s
                 ? "bg-ink text-paper"
@@ -98,6 +173,21 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
             }`}
           >
             {s}
+          </Link>
+        ))}
+      </div>
+      <div className="mb-6 flex flex-wrap gap-2">
+        {RANGES.map((r) => (
+          <Link
+            key={r}
+            href={buildHref({ status: activeStatus, q: search, range: r })}
+            className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest transition ${
+              range === r
+                ? "bg-cream text-ink ring-1 ring-ink"
+                : "border border-border bg-paper text-muted-foreground hover:border-ink"
+            }`}
+          >
+            {r === "all" ? "All time" : r === "today" ? "Today" : r === "7d" ? "Last 7 days" : "Last 30 days"}
           </Link>
         ))}
       </div>
@@ -111,7 +201,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
 
       {orders.length === 0 && hasAdminEnv() && (
         <p className="rounded-xl border border-border bg-paper p-6 text-sm text-muted-foreground">
-          {activeStatus === "all" ? "No orders yet." : `No ${activeStatus} orders.`}
+          No orders match your filters.
         </p>
       )}
 

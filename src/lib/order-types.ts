@@ -6,6 +6,7 @@ export interface CheckoutPayload {
   city: string;
   address: string;
   notes?: string;
+  email?: string;
   items: CartItem[];
   honeypot?: string;
   idempotencyKey?: string;

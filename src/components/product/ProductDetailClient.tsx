@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Share2, Copy, Check, MessageCircle, Eye } from "lucide-react";
 import AddToCartButton from "./AddToCartButton";
 import RestockNotify from "./RestockNotify";
+import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
 import Accordion from "@/components/ui/Accordion";
@@ -120,7 +121,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <button
                 key={s}
                 onClick={() => setSelectedSize(s)}
-                className={`min-w-[52px] rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
+                className={`min-w-13 rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
                   selectedSize === s
                     ? "border-ink bg-ink text-paper"
                     : "border-border bg-paper text-ink hover:border-ink"
@@ -174,6 +175,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <Share2 className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      <StickyBuyBar product={product} selectedSize={selectedSize} />
 
       <Accordion
         defaultOpen="details"
