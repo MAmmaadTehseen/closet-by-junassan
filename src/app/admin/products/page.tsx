@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Pencil, Plus } from "lucide-react";
 import { isAdminAuthed } from "@/lib/admin-auth";
 import { fetchProducts } from "@/lib/products";
 import { hasAdminEnv } from "@/lib/supabase/admin";
-import { updateProduct, applyBulkDiscount, clearBulkDiscount } from "@/lib/admin-actions";
+import { updateProduct, applyBulkDiscount, clearBulkDiscount, deleteProduct } from "@/lib/admin-actions";
 import { fetchCategories } from "@/lib/categories";
 import { formatPKR } from "@/lib/format";
 import AdminForm from "@/components/admin/AdminForm";
@@ -27,9 +27,17 @@ export default async function AdminProductsPage() {
           <p className="eyebrow">Admin · Catalog</p>
           <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Products</h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            {products.length} pieces · inline edit price, stock, and discount.
+            {products.length} pieces · inline edit price &amp; stock, or open a product to edit everything.
           </p>
         </div>
+        {editable && (
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-paper hover:opacity-90"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Product
+          </Link>
+        )}
       </div>
 
       {editable && (
@@ -174,11 +182,22 @@ export default async function AdminProductsPage() {
                     >
                       Save
                     </SubmitButton>
+                    {editable && (
+                      <Link
+                        href={`/admin/products/${p.id}/edit`}
+                        aria-label="Edit all fields"
+                        className="rounded-full border border-border p-2 text-muted-foreground hover:border-ink hover:text-ink"
+                        title="Edit all fields"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Link>
+                    )}
                     <Link
                       href={`/product/${p.slug}`}
                       target="_blank"
-                      aria-label="View"
+                      aria-label="View on storefront"
                       className="text-muted-foreground hover:text-ink"
+                      title="View on storefront"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                     </Link>
@@ -187,6 +206,18 @@ export default async function AdminProductsPage() {
                     Current: {formatPKR(p.price_pkr)} · Stock {p.stock}
                   </p>
                 </AdminForm>
+                {editable && (
+                  <AdminForm action={deleteProduct} className="mt-1 flex justify-end">
+                    <input type="hidden" name="id" value={p.id} />
+                    <ConfirmButton
+                      message={`Delete "${p.name}"? This cannot be undone.`}
+                      pendingText="Deleting…"
+                      className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-accent-red"
+                    >
+                      Delete
+                    </ConfirmButton>
+                  </AdminForm>
+                )}
               </li>
             );
           })}

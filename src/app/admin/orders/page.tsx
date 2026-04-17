@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthed } from "@/lib/admin-auth";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
@@ -28,8 +29,17 @@ interface OrderItemRow {
   size: string | null;
 }
 
-export default async function AdminOrdersPage() {
+const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
+type Status = (typeof STATUSES)[number];
+
+type SP = Promise<{ status?: string }>;
+
+export default async function AdminOrdersPage({ searchParams }: { searchParams: SP }) {
   if (!(await isAdminAuthed())) redirect("/admin/login");
+
+  const { status: filterStatus } = await searchParams;
+  const activeStatus: Status | "all" =
+    STATUSES.includes(filterStatus as Status) ? (filterStatus as Status) : "all";
 
   let orders: OrderRow[] = [];
   const itemsByOrder: Record<string, OrderItemRow[]> = {};
@@ -37,12 +47,19 @@ export default async function AdminOrdersPage() {
   if (hasAdminEnv()) {
     try {
       const supabase = createAdminClient();
-      const { data } = await supabase
+      let q = supabase
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(200);
+
+      if (activeStatus !== "all") {
+        q = q.eq("status", activeStatus);
+      }
+
+      const { data } = await q;
       orders = (data ?? []) as OrderRow[];
+
       if (orders.length > 0) {
         const ids = orders.map((o) => o.id);
         const { data: items } = await supabase
@@ -58,28 +75,43 @@ export default async function AdminOrdersPage() {
     }
   }
 
-  const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
-
   return (
     <>
-      <div className="mb-8">
+      <div className="mb-6">
         <p className="eyebrow">Admin · Operations</p>
         <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Orders</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          {orders.length} orders · newest first.
+          {orders.length} {activeStatus === "all" ? "total" : activeStatus} orders · newest first.
         </p>
+      </div>
+
+      {/* Status filter tabs */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        {(["all", ...STATUSES] as const).map((s) => (
+          <Link
+            key={s}
+            href={s === "all" ? "/admin/orders" : `/admin/orders?status=${s}`}
+            className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest transition ${
+              activeStatus === s
+                ? "bg-ink text-paper"
+                : "border border-border bg-paper text-muted-foreground hover:border-ink hover:text-ink"
+            }`}
+          >
+            {s}
+          </Link>
+        ))}
       </div>
 
       {!hasAdminEnv() && (
         <p className="rounded-xl border border-border bg-paper p-6 text-sm text-muted-foreground">
-          Supabase is not configured. Orders are only visible once you set
-          {" "}<code>SUPABASE_SERVICE_ROLE_KEY</code> on the server.
+          Supabase is not configured. Orders are only visible once you set{" "}
+          <code>SUPABASE_SERVICE_ROLE_KEY</code> on the server.
         </p>
       )}
 
       {orders.length === 0 && hasAdminEnv() && (
         <p className="rounded-xl border border-border bg-paper p-6 text-sm text-muted-foreground">
-          No orders yet.
+          {activeStatus === "all" ? "No orders yet." : `No ${activeStatus} orders.`}
         </p>
       )}
 
@@ -169,9 +201,9 @@ export default async function AdminOrdersPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    pending: "bg-amber-100 text-amber-900",
+    pending:   "bg-amber-100 text-amber-900",
     confirmed: "bg-blue-100 text-blue-900",
-    shipped: "bg-indigo-100 text-indigo-900",
+    shipped:   "bg-indigo-100 text-indigo-900",
     delivered: "bg-green-100 text-green-900",
     cancelled: "bg-red-100 text-red-900",
   };
