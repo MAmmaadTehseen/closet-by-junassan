@@ -33,6 +33,7 @@ export default function ProductCard({
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               priority={priority}
+              style={{ viewTransitionName: `product-${product.id}` }}
               className={`object-cover transition-[opacity,transform] duration-700 ease-out ${
                 hasSecondImage ? "group-hover:opacity-0" : "group-hover:scale-[1.03]"
               }`}

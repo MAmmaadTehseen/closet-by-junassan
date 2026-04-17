@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
-import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
+import { Upload, X, ImageIcon, Loader2, GripVertical } from "lucide-react";
 import { uploadProductImage } from "@/lib/admin-actions";
 
 interface ImgEntry {
@@ -26,7 +26,21 @@ export default function ImageUploader({ initialImages = [] }: { initialImages?: 
     })),
   );
   const [dragging, setDragging] = useState(false);
+  const [dragUid, setDragUid] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const reorder = (fromUid: string, toUid: string) => {
+    if (fromUid === toUid) return;
+    setImages((prev) => {
+      const fromIdx = prev.findIndex((i) => i.uid === fromUid);
+      const toIdx = prev.findIndex((i) => i.uid === toUid);
+      if (fromIdx < 0 || toIdx < 0) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(fromIdx, 1);
+      next.splice(toIdx, 0, moved);
+      return next;
+    });
+  };
 
   const update = (uid: string, patch: Partial<ImgEntry>) =>
     setImages((prev) => prev.map((img) => (img.uid === uid ? { ...img, ...patch } : img)));
@@ -89,7 +103,20 @@ export default function ImageUploader({ initialImages = [] }: { initialImages?: 
           {images.map((img, i) => (
             <div
               key={img.uid}
-              className="relative aspect-square overflow-hidden rounded-xl border border-border bg-cream"
+              draggable={img.status === "done"}
+              onDragStart={() => setDragUid(img.uid)}
+              onDragOver={(e) => {
+                if (dragUid && dragUid !== img.uid) e.preventDefault();
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragUid) reorder(dragUid, img.uid);
+                setDragUid(null);
+              }}
+              onDragEnd={() => setDragUid(null)}
+              className={`relative aspect-square overflow-hidden rounded-xl border border-border bg-cream ${
+                img.status === "done" ? "cursor-grab active:cursor-grabbing" : ""
+              } ${dragUid === img.uid ? "opacity-50" : ""}`}
             >
               {img.status === "uploading" ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-cream">
@@ -111,6 +138,13 @@ export default function ImageUploader({ initialImages = [] }: { initialImages?: 
               {i === 0 && img.status === "done" && (
                 <span className="absolute bottom-1 left-1 rounded bg-ink/70 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-paper">
                   Cover
+                </span>
+              )}
+
+              {/* Drag handle */}
+              {img.status === "done" && (
+                <span className="pointer-events-none absolute bottom-1 right-1 rounded bg-ink/40 p-0.5 text-paper">
+                  <GripVertical className="h-3 w-3" />
                 </span>
               )}
 
@@ -163,6 +197,7 @@ export default function ImageUploader({ initialImages = [] }: { initialImages?: 
 
       <p className="text-[11px] text-muted-foreground">
         {doneImages.length} / {MAX} uploaded
+        {doneImages.length > 1 && <span className="ml-1">· Drag to reorder — first image is the cover</span>}
         {doneImages.length === 0 && (
           <span className="ml-1 text-accent-red">· At least 1 image required</span>
         )}

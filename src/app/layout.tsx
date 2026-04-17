@@ -71,8 +71,13 @@ export default function RootLayout({
     description: siteConfig.description,
   };
 
+  const themeBootstrap = `(function(){try{var t=localStorage.getItem('closet-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body className="flex min-h-dvh flex-col bg-background text-foreground">
         <DevBanner />
         {children}

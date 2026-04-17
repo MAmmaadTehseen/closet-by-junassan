@@ -18,6 +18,25 @@
   --accent: var(--charcoal);
 }
 
+:root[data-theme='dark'] {
+  --ink: #f5f1e8;
+  --charcoal: #e8e2d5;
+  --paper: #0c0b0a;
+  --cream: #1a1714;
+  --sand: #2a2420;
+  --line: #2a2420;
+  --muted-fg: #9a9185;
+  --accent-red: #e64552;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --muted: var(--cream);
+  --muted-foreground: var(--muted-fg);
+  --border: var(--line);
+  --accent: var(--charcoal);
+  color-scheme: dark;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -197,6 +216,43 @@ body {
   animation: check-draw 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
 }
 
+@keyframes cart-bump {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.18) rotate(-6deg); }
+  60% { transform: scale(0.92) rotate(4deg); }
+}
+.cart-bump { animation: cart-bump 0.55s cubic-bezier(0.22, 1.4, 0.36, 1); }
+
+@keyframes bar-rise {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.bar-rise { animation: bar-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes ring-sweep {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* View Transitions — shop grid ↔ PDP morphing */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(root) {
+  animation-name: fade-out-vt;
+}
+::view-transition-new(root) {
+  animation-name: fade-in-vt;
+}
+@keyframes fade-out-vt {
+  to { opacity: 0; }
+}
+@keyframes fade-in-vt {
+  from { opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -208,4 +264,6 @@ body {
   }
   .marquee > .marquee__track { animation: none; }
   .reveal { opacity: 1; transform: none; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
 }

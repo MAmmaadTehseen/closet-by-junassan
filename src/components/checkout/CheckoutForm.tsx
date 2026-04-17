@@ -18,12 +18,13 @@ const STORAGE_KEY = "closet-checkout-draft";
 interface Draft {
   full_name: string;
   phone: string;
+  email: string;
   city: string;
   address: string;
   notes: string;
 }
 
-const EMPTY: Draft = { full_name: "", phone: "", city: "", address: "", notes: "" };
+const EMPTY: Draft = { full_name: "", phone: "", email: "", city: "", address: "", notes: "" };
 
 export default function CheckoutForm() {
   const items = useCart((s) => s.items);
@@ -104,6 +105,7 @@ export default function CheckoutForm() {
         city: draft.city,
         address: draft.address,
         notes: draft.notes || undefined,
+        email: draft.email?.trim() || undefined,
         items,
         honeypot: honeypot?.value ?? "",
         idempotencyKey: idempotencyKey.current,
@@ -144,6 +146,16 @@ export default function CheckoutForm() {
               autoComplete="tel"
               required
               hint="We&apos;ll call to confirm your order before dispatch."
+            />
+            <Field
+              label="Email (optional)"
+              name="email"
+              type="email"
+              value={draft.email}
+              onChange={(v) => setDraft((d) => ({ ...d, email: v }))}
+              placeholder="you@example.com"
+              autoComplete="email"
+              hint="For order confirmation and tracking updates."
             />
             <Field
               label="City"

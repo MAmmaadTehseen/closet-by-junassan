@@ -5,7 +5,9 @@ import ProductDetailClient from "@/components/product/ProductDetailClient";
 import ProductGrid from "@/components/product/ProductGrid";
 import RecentlyViewed from "@/components/product/RecentlyViewed";
 import Breadcrumbs from "@/components/product/Breadcrumbs";
+import Reviews from "@/components/product/Reviews";
 import { fetchProductBySlug, fetchRelated, fetchProducts } from "@/lib/products";
+import { fetchApprovedReviews } from "@/lib/reviews";
 import { siteConfig } from "@/lib/site-config";
 import { CATEGORIES } from "@/lib/types";
 
@@ -33,12 +35,31 @@ export default async function ProductPage({ params }: { params: Params }) {
   const product = await fetchProductBySlug(slug);
   if (!product) notFound();
 
-  const [related, allProducts] = await Promise.all([
+  const [related, allProducts, reviews] = await Promise.all([
     fetchRelated(product),
     fetchProducts({ limit: 60 }),
+    fetchApprovedReviews(product.id),
   ]);
 
   const category = CATEGORIES.find((c) => c.slug === product.category);
+
+  const reviewAgg =
+    reviews.length > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: (reviews.reduce((n, r) => n + r.rating, 0) / reviews.length).toFixed(1),
+            reviewCount: reviews.length,
+          },
+          review: reviews.slice(0, 10).map((r) => ({
+            "@type": "Review",
+            reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
+            author: { "@type": "Person", name: r.author_name },
+            datePublished: r.created_at,
+            reviewBody: r.body,
+          })),
+        }
+      : {};
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -58,6 +79,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           : "https://schema.org/OutOfStock",
       url: `${siteConfig.url}/product/${product.slug}`,
     },
+    ...reviewAgg,
   };
 
   const breadcrumbLd = {
@@ -87,11 +109,21 @@ export default async function ProductPage({ params }: { params: Params }) {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-16">
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <Gallery images={product.images} alt={product.name} />
+            <Gallery
+              images={product.images}
+              alt={product.name}
+              transitionName={`product-${product.id}`}
+            />
           </div>
           <ProductDetailClient product={product} />
         </div>
       </div>
+
+      {reviews.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
+          <Reviews reviews={reviews} />
+        </section>
+      )}
 
       {related.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">

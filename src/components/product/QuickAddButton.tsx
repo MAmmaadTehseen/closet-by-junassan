@@ -1,10 +1,11 @@
 "use client";
 
 import { Plus, Check } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useCart } from "@/lib/cart-store";
 import { useUi } from "@/lib/ui-store";
 import { toast } from "@/components/ui/Toaster";
+import { flyToCart } from "@/lib/fly-to-cart";
 import type { Product } from "@/lib/types";
 
 export default function QuickAddButton({
@@ -17,12 +18,16 @@ export default function QuickAddButton({
   const add = useCart((s) => s.add);
   const openCart = useUi((s) => s.openCart);
   const [done, setDone] = useState(false);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
   const soldOut = product.stock === 0;
 
   const onClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (soldOut) return;
+    const card = btnRef.current?.closest(".group");
+    const img = card?.querySelector("img") as HTMLElement | null;
+    if (img) flyToCart(img);
     add({
       id: product.id,
       slug: product.slug,
@@ -41,6 +46,7 @@ export default function QuickAddButton({
 
   return (
     <button
+      ref={btnRef}
       onClick={onClick}
       disabled={soldOut}
       aria-label={soldOut ? "Sold out" : `Add ${product.name} to bag`}

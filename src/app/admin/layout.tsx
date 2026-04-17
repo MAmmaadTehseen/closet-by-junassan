@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Boxes, ClipboardList, LogOut, LayoutDashboard, Tag } from "lucide-react";
+import { Boxes, ClipboardList, LogOut, LayoutDashboard, Tag, Users, Sparkles, Star } from "lucide-react";
 import { isAdminAuthed, getAdminPassword } from "@/lib/admin-auth";
 import { logoutAction } from "@/lib/admin-actions";
 import { hasAdminEnv } from "@/lib/supabase/admin";
 import { siteConfig } from "@/lib/site-config";
 import Toaster from "@/components/ui/Toaster";
+import AdminCommandPalette from "@/components/admin/AdminCommandPalette";
 
 export const metadata = {
   title: "Admin",
@@ -51,6 +52,9 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           <AdminLink href="/admin/products" icon={<Boxes className="h-4 w-4" />} label="Products" />
           <AdminLink href="/admin/categories" icon={<Tag className="h-4 w-4" />} label="Categories" />
           <AdminLink href="/admin/orders" icon={<ClipboardList className="h-4 w-4" />} label="Orders" />
+          <AdminLink href="/admin/customers" icon={<Users className="h-4 w-4" />} label="Customers" />
+          <AdminLink href="/admin/drops" icon={<Sparkles className="h-4 w-4" />} label="Drops" />
+          <AdminLink href="/admin/reviews" icon={<Star className="h-4 w-4" />} label="Reviews" />
         </nav>
         <form action={logoutAction} className="border-t border-border p-4">
           <button
@@ -85,6 +89,7 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           {children}
         </div>
         <Toaster />
+        <AdminCommandPalette />
       </div>
     </div>
   );
