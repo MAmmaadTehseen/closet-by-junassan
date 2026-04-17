@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { siteConfig, waLink } from "@/lib/site-config";
-import { CATEGORIES } from "@/lib/types";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import { MessageCircle } from "lucide-react";
+import type { CategoryDef } from "@/lib/categories";
 
-export default function Footer() {
+export default function Footer({ categories = [] }: { categories?: CategoryDef[] }) {
   return (
     <footer className="mt-20 border-t border-border bg-cream/50">
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-8 sm:px-6">
@@ -48,7 +48,7 @@ export default function Footer() {
           <div>
             <p className="eyebrow">Shop</p>
             <ul className="mt-4 space-y-2.5 text-sm">
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <li key={c.slug}>
                   <Link className="text-ink/80 hover:text-ink" href={`/category/${c.slug}`}>
                     {c.label}

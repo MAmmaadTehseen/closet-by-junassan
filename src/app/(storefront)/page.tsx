@@ -8,16 +8,18 @@ import HowCodWorks from "@/components/home/HowCodWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
 import { fetchProducts } from "@/lib/products";
+import { fetchCategories } from "@/lib/categories";
 
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [newArrivals, under2k, trending, limited, all] = await Promise.all([
+  const [newArrivals, under2k, trending, limited, all, categories] = await Promise.all([
     fetchProducts({ tag: "new", limit: 8 }),
     fetchProducts({ maxPrice: 2000, limit: 8 }),
     fetchProducts({ tag: "trending", limit: 8 }),
     fetchProducts({ tag: "limited", limit: 8 }),
     fetchProducts({ limit: 200 }),
+    fetchCategories(),
   ]);
 
   const categoryCounts: Record<string, number> = {};
@@ -29,7 +31,7 @@ export default async function HomePage() {
     <>
       <Hero />
       <InstagramMosaic products={newArrivals} />
-      <CategoryGrid counts={categoryCounts} />
+      <CategoryGrid categories={categories} counts={categoryCounts} />
       <ProductRail
         eyebrow="03 · Best for your rupee"
         title="Under 2000 PKR ⭐"

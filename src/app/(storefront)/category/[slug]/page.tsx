@@ -5,37 +5,40 @@ import ProductGrid from "@/components/product/ProductGrid";
 import SortSelect from "@/components/shop/SortSelect";
 import Breadcrumbs from "@/components/product/Breadcrumbs";
 import { fetchProducts } from "@/lib/products";
-import { CATEGORIES, type Category } from "@/lib/types";
+import { fetchCategories } from "@/lib/categories";
 import { siteConfig } from "@/lib/site-config";
 
 export const revalidate = 3600;
 
+/** Fallback hero images for the original 5 categories. */
 const CATEGORY_IMAGES: Record<string, string> = {
-  men: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1600&q=80",
+  men:   "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1600&q=80",
   women: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=1600&q=80",
-  kids: "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?auto=format&fit=crop&w=1600&q=80",
+  kids:  "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?auto=format&fit=crop&w=1600&q=80",
   shoes: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1600&q=80",
-  bags: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=80",
+  bags:  "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=80",
 };
 
 const CATEGORY_COPY: Record<string, string> = {
-  men: "Jackets, tees, polos and more — curated men's thrift.",
+  men:   "Jackets, tees, polos and more — curated men's thrift.",
   women: "Dresses, blouses, denim and layering essentials.",
-  kids: "Soft, durable pieces for little adventurers.",
+  kids:  "Soft, durable pieces for little adventurers.",
   shoes: "Sneakers, loafers and sandals — inspected and ready.",
-  bags: "Totes, crossbodies and clutches for every occasion.",
+  bags:  "Totes, crossbodies and clutches for every occasion.",
 };
 
 type Params = Promise<{ slug: string }>;
 type SP = Promise<{ sort?: string }>;
 
 export async function generateStaticParams() {
-  return CATEGORIES.map((c) => ({ slug: c.slug }));
+  const categories = await fetchCategories();
+  return categories.map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const cat = CATEGORIES.find((c) => c.slug === slug);
+  const categories = await fetchCategories();
+  const cat = categories.find((c) => c.slug === slug);
   return {
     title: cat ? cat.label : "Category",
     description: cat ? `Shop ${cat.label.toLowerCase()} thrift finds.` : undefined,
@@ -50,27 +53,35 @@ export default async function CategoryPage({
   searchParams: SP;
 }) {
   const { slug } = await params;
-  const cat = CATEGORIES.find((c) => c.slug === slug);
+  const categories = await fetchCategories();
+  const cat = categories.find((c) => c.slug === slug);
   if (!cat) notFound();
 
   const sp = await searchParams;
   const products = await fetchProducts({
-    category: slug as Category,
+    category: slug,
     sort: (sp.sort as "newest" | "price-asc" | "price-desc") || "newest",
   });
 
+  const heroImage = cat.cover_image ?? CATEGORY_IMAGES[slug];
+  const heroCopy  = CATEGORY_COPY[slug] ?? `Shop ${cat.label.toLowerCase()} collection.`;
+
   return (
     <>
-      <section className="relative h-[46vh] min-h-[360px] overflow-hidden border-b border-border bg-cream">
-        <Image
-          src={CATEGORY_IMAGES[slug]}
-          alt={cat.label}
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/30 to-transparent" />
+      <section className="relative h-[46vh] min-h-90 overflow-hidden border-b border-border bg-cream">
+        {heroImage ? (
+          <Image
+            src={heroImage}
+            alt={cat.label}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 bg-linear-to-br from-cream to-ink/10" />
+        )}
+        <div className="absolute inset-0 bg-linear-to-t from-ink/75 via-ink/30 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-4 pb-10 sm:px-6 sm:pb-14">
           <Breadcrumbs
             items={[
@@ -83,7 +94,7 @@ export default async function CategoryPage({
           <h1 className="mt-2 font-display text-5xl font-semibold leading-[1.05] text-paper sm:text-7xl">
             {cat.label}
           </h1>
-          <p className="mt-3 max-w-md text-sm text-paper/80">{CATEGORY_COPY[slug]}</p>
+          <p className="mt-3 max-w-md text-sm text-paper/80">{heroCopy}</p>
         </div>
       </section>
 
@@ -104,8 +115,8 @@ export default async function CategoryPage({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: `${siteConfig.url}/` },
-              { "@type": "ListItem", position: 2, name: "Shop", item: `${siteConfig.url}/shop` },
+              { "@type": "ListItem", position: 1, name: "Home",  item: `${siteConfig.url}/` },
+              { "@type": "ListItem", position: 2, name: "Shop",  item: `${siteConfig.url}/shop` },
               { "@type": "ListItem", position: 3, name: cat.label, item: `${siteConfig.url}/category/${slug}` },
             ],
           }),

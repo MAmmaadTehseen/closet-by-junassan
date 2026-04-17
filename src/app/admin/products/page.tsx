@@ -6,7 +6,7 @@ import { isAdminAuthed } from "@/lib/admin-auth";
 import { fetchProducts } from "@/lib/products";
 import { hasAdminEnv } from "@/lib/supabase/admin";
 import { updateProduct, applyBulkDiscount, clearBulkDiscount } from "@/lib/admin-actions";
-import { CATEGORIES } from "@/lib/types";
+import { fetchCategories } from "@/lib/categories";
 import { formatPKR } from "@/lib/format";
 import AdminForm from "@/components/admin/AdminForm";
 import SubmitButton from "@/components/admin/SubmitButton";
@@ -14,7 +14,10 @@ import ConfirmButton from "@/components/admin/ConfirmButton";
 
 export default async function AdminProductsPage() {
   if (!(await isAdminAuthed())) redirect("/admin/login");
-  const products = await fetchProducts({ limit: 200 });
+  const [products, categories] = await Promise.all([
+    fetchProducts({ limit: 200 }),
+    fetchCategories(),
+  ]);
   const editable = hasAdminEnv();
 
   return (
@@ -43,7 +46,7 @@ export default async function AdminProductsPage() {
               className="rounded-full border border-border bg-paper px-4 py-2 text-xs font-semibold uppercase tracking-widest"
             >
               <option value="">All categories</option>
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.label}
                 </option>
@@ -74,7 +77,7 @@ export default async function AdminProductsPage() {
               className="rounded-full border border-border bg-paper px-4 py-2 text-xs font-semibold uppercase tracking-widest"
             >
               <option value="">All categories</option>
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.label}
                 </option>
