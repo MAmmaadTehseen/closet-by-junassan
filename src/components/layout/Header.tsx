@@ -11,12 +11,14 @@ import { siteConfig } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import LangToggle from "@/components/layout/LangToggle";
 import type { CategoryDef } from "@/lib/categories";
 
 export default function Header({ categories = [] }: { categories?: CategoryDef[] }) {
   const NAV_LINKS = [
     { href: "/shop", label: "Shop" },
     ...categories.map((c) => ({ href: `/category/${c.slug}`, label: c.label })),
+    { href: "/collections", label: "Collections" },
     { href: "/deals", label: "Deals" },
   ];
   const pathname = usePathname();
@@ -41,7 +43,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
   return (
     <header className="sticky top-0 z-40 w-full">
       <AnnouncementBar />
-      <div className="border-b border-border bg-paper/85 backdrop-blur-md">
+      <div className="progressive-blur border-b border-border">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button
@@ -90,6 +92,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
             >
               <Search className="h-5 w-5" />
             </button>
+            <LangToggle />
             <ThemeToggle />
             <Link
               href="/wishlist"
@@ -167,6 +170,13 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
                 className="flex items-center gap-2 border-b border-border py-4 text-base font-medium"
               >
                 <Heart className="h-4 w-4" /> Wishlist
+              </Link>
+              <Link
+                href="/my"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                My Closet · Orders & Coins
               </Link>
               <Link
                 href="/about"

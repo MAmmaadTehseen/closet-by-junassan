@@ -3,14 +3,18 @@ import { ArrowRight, Star, Truck, Sparkles } from "lucide-react";
 import Marquee from "@/components/ui/Marquee";
 import MagneticButton from "@/components/ui/MagneticButton";
 import HeroCollage from "@/components/home/HeroCollage";
+import { getSetting, MARQUEE_KEY, DEFAULT_MARQUEE } from "@/lib/site-settings";
+import { getT } from "@/lib/i18n";
 
-export default function Hero() {
+export default async function Hero() {
+  const marqueeItems = await getSetting<string[]>(MARQUEE_KEY, DEFAULT_MARQUEE);
+  const t = await getT();
   return (
     <section className="relative overflow-hidden border-b border-border bg-paper">
       <div className="pointer-events-none absolute inset-0 noise opacity-40" aria-hidden />
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pt-16 pb-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:pt-24 lg:pb-20">
         <div className="animate-fade-up">
-          <p className="eyebrow">Curated Thrift · Weekly Drops</p>
+          <p className="eyebrow">{t("hero.eyebrow")}</p>
           <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.02] tracking-[-0.015em] sm:text-5xl md:text-6xl lg:text-7xl">
             Affordable{" "}
             <span className="italic text-ink/80">Branded</span> Fashion
@@ -28,7 +32,7 @@ export default function Hero() {
                 href="/shop"
                 className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90"
               >
-                Shop the Drop
+                {t("hero.cta_primary")}
                 <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
               </Link>
             </MagneticButton>
@@ -37,7 +41,7 @@ export default function Hero() {
                 href="/deals"
                 className="inline-flex items-center gap-2 rounded-full border border-ink px-7 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-paper"
               >
-                Under 2000 PKR
+                {t("hero.cta_secondary")}
               </Link>
             </MagneticButton>
           </div>
@@ -58,16 +62,7 @@ export default function Hero() {
         <HeroCollage />
       </div>
 
-      <Marquee
-        items={[
-          "Free Delivery",
-          "Cash on Delivery",
-          "Karachi → Gilgit",
-          "New drops every week",
-          "Limited pieces",
-          "Hand-picked finds",
-        ]}
-      />
+      <Marquee items={marqueeItems} />
     </section>
   );
 }

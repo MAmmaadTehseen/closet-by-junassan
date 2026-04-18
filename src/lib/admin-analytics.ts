@@ -83,6 +83,90 @@ export async function getTopProducts(limit = 5): Promise<TopProduct[]> {
   }
 }
 
+export type VelocityRow = {
+  product_id: string;
+  name: string;
+  units_30d: number;
+  revenue_30d: number;
+  in_stock: number;
+  weeks_of_cover: number | null;
+};
+
+/**
+ * Compute 30-day unit velocity per product from order_items.
+ * Joins with products to get name + current stock.
+ */
+export async function getProductVelocity(): Promise<{
+  topSellers: VelocityRow[];
+  runningLow: VelocityRow[];
+  slowMovers: VelocityRow[];
+}> {
+  const empty = { topSellers: [], runningLow: [], slowMovers: [] };
+  if (!hasAdminEnv()) return empty;
+
+  const since = new Date();
+  since.setDate(since.getDate() - 30);
+
+  try {
+    const supabase = createAdminClient();
+    // Fetch recent delivered/confirmed/shipped orders' items.
+    const { data: orders } = await supabase
+      .from("orders")
+      .select("id,created_at,status")
+      .gte("created_at", since.toISOString())
+      .neq("status", "cancelled");
+    const orderIds = (orders ?? []).map((o) => o.id);
+    if (orderIds.length === 0) return empty;
+
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("product_id,quantity,price_pkr")
+      .in("order_id", orderIds);
+
+    const agg = new Map<string, { units: number; revenue: number }>();
+    for (const it of items ?? []) {
+      if (!it.product_id) continue;
+      const e = agg.get(it.product_id) ?? { units: 0, revenue: 0 };
+      e.units += it.quantity ?? 0;
+      e.revenue += (it.price_pkr ?? 0) * (it.quantity ?? 0);
+      agg.set(it.product_id, e);
+    }
+
+    const { data: products } = await supabase
+      .from("products")
+      .select("id,name,stock")
+      .limit(500);
+
+    const rows: VelocityRow[] = (products ?? []).map((p) => {
+      const a = agg.get(p.id) ?? { units: 0, revenue: 0 };
+      const weeklyRate = a.units / (30 / 7);
+      return {
+        product_id: p.id as string,
+        name: p.name as string,
+        units_30d: a.units,
+        revenue_30d: a.revenue,
+        in_stock: p.stock as number,
+        weeks_of_cover: weeklyRate > 0 ? +(p.stock / weeklyRate).toFixed(1) : null,
+      };
+    });
+
+    const withSales = rows.filter((r) => r.units_30d > 0);
+
+    return {
+      topSellers: [...withSales].sort((a, b) => b.revenue_30d - a.revenue_30d).slice(0, 5),
+      runningLow: withSales
+        .filter((r) => r.weeks_of_cover !== null && r.weeks_of_cover < 2 && r.in_stock > 0)
+        .sort((a, b) => (a.weeks_of_cover ?? 0) - (b.weeks_of_cover ?? 0))
+        .slice(0, 5),
+      slowMovers: rows
+        .filter((r) => r.units_30d === 0 && r.in_stock > 2)
+        .slice(0, 5),
+    };
+  } catch {
+    return empty;
+  }
+}
+
 export async function getStatusMix(): Promise<StatusMix[]> {
   const statuses = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
   const out: StatusMix[] = statuses.map((status) => ({ status, count: 0 }));

@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { isAdminAuthed, loginAdmin, logoutAdmin } from "./admin-auth";
 import { createAdminClient, hasAdminEnv } from "./supabase/admin";
 import { sendStatusUpdate } from "./email";
+import { normalizePhoneKey, pointsFor } from "./loyalty";
+import { setSetting, MARQUEE_KEY } from "./site-settings";
+import { logAudit } from "./audit";
 
 export type ActionResult = { ok: true; message: string } | { ok: false; error: string };
 export type UploadResult = { url: string } | { error: string };
@@ -475,12 +478,14 @@ export async function updateOrderStatus(
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return { ok: false, error: error.message };
 
-    // Fire email notification (best-effort, non-blocking).
+    // Fetch order shape for side effects.
     const { data: order } = await supabase
       .from("orders")
-      .select("email,full_name,phone,public_code")
+      .select("email,full_name,phone,public_code,subtotal_pkr")
       .eq("id", id)
       .single();
+
+    // Email notification (best-effort, non-blocking).
     if (order?.email && order.public_code) {
       void sendStatusUpdate({
         email: order.email,
@@ -490,11 +495,34 @@ export async function updateOrderStatus(
         status,
       });
     }
+
+    // Loyalty credit on delivery — unique-indexed per (order_id, 'order_delivered').
+    if (status === "delivered" && order?.phone) {
+      const delta = pointsFor(order.subtotal_pkr ?? 0);
+      if (delta > 0) {
+        await supabase
+          .from("loyalty_ledger")
+          .insert({
+            phone: normalizePhoneKey(order.phone),
+            order_id: id,
+            delta_points: delta,
+            reason: "order_delivered",
+          })
+          .then(() => {});
+      }
+    }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
   }
 
+  void logAudit({
+    action: "order_status_changed",
+    entity: "order",
+    entity_id: id,
+    summary: `Status → ${status}`,
+  });
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/customers");
   return { ok: true, message: `Order status updated to "${status}".` };
 }
 
@@ -514,6 +542,8 @@ export async function createDrop(
   const cta_href = String(formData.get("cta_href") ?? "").trim() || null;
   const sort_order = Number(formData.get("sort_order") ?? 0);
   const active = formData.get("active") === "on";
+  const goes_live_at = parseDateTimeLocal(formData.get("goes_live_at"));
+  const ends_at = parseDateTimeLocal(formData.get("ends_at"));
 
   if (!title) return { ok: false, error: "Title is required." };
   if (!cover_image) return { ok: false, error: "Cover image is required." };
@@ -528,6 +558,8 @@ export async function createDrop(
       cta_href,
       sort_order: Number.isFinite(sort_order) ? sort_order : 0,
       active,
+      goes_live_at,
+      ends_at,
     });
     if (error) return { ok: false, error: error.message };
   } catch (err) {
@@ -537,6 +569,13 @@ export async function createDrop(
   revalidatePath("/admin/drops");
   revalidatePath("/");
   return { ok: true, message: "Drop created." };
+}
+
+function parseDateTimeLocal(v: FormDataEntryValue | null): string | null {
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
 export async function updateDrop(
@@ -554,6 +593,8 @@ export async function updateDrop(
   const cta_href = String(formData.get("cta_href") ?? "").trim() || null;
   const sort_order = Number(formData.get("sort_order") ?? 0);
   const active = formData.get("active") === "on";
+  const goes_live_at = parseDateTimeLocal(formData.get("goes_live_at"));
+  const ends_at = parseDateTimeLocal(formData.get("ends_at"));
 
   if (!id || !title || !cover_image) {
     return { ok: false, error: "ID, title and cover image are required." };
@@ -571,6 +612,8 @@ export async function updateDrop(
         cta_href,
         sort_order: Number.isFinite(sort_order) ? sort_order : 0,
         active,
+        goes_live_at,
+        ends_at,
       })
       .eq("id", id);
     if (error) return { ok: false, error: error.message };
@@ -646,4 +689,391 @@ export async function deleteReview(
   }
   revalidatePath("/admin/reviews");
   return { ok: true, message: "Review deleted." };
+}
+
+// ─── Collections (editorial sets) ────────────────────────────────────────────
+
+function validCollectionSlug(s: string) {
+  return /^[a-z0-9-]+$/.test(s) && s.length <= 60;
+}
+
+export async function createCollection(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
+  const title = String(formData.get("title") ?? "").trim();
+  const subtitle = String(formData.get("subtitle") ?? "").trim() || null;
+  const cover_image = String(formData.get("cover_image") ?? "").trim() || null;
+  const description_md = String(formData.get("description_md") ?? "").trim() || null;
+  const sort_order = Number(formData.get("sort_order") ?? 0);
+  const featured = formData.get("featured") === "on";
+  const active = formData.get("active") !== "off";
+
+  if (!title) return { ok: false, error: "Title is required." };
+  if (!validCollectionSlug(slug)) {
+    return { ok: false, error: "Slug must use lowercase letters, numbers, and hyphens only." };
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("collections").insert({
+      slug,
+      title,
+      subtitle,
+      cover_image,
+      description_md,
+      sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+      featured,
+      active,
+    });
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Create failed." };
+  }
+
+  revalidatePath("/admin/collections");
+  revalidatePath("/collections");
+  revalidatePath("/");
+  redirect(`/admin/collections/${slug}/edit`);
+}
+
+export async function updateCollection(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const slug = String(formData.get("slug") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const subtitle = String(formData.get("subtitle") ?? "").trim() || null;
+  const cover_image = String(formData.get("cover_image") ?? "").trim() || null;
+  const description_md = String(formData.get("description_md") ?? "").trim() || null;
+  const sort_order = Number(formData.get("sort_order") ?? 0);
+  const featured = formData.get("featured") === "on";
+  const active = formData.get("active") !== "off";
+
+  if (!slug || !title) return { ok: false, error: "Slug and title are required." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("collections")
+      .update({
+        title,
+        subtitle,
+        cover_image,
+        description_md,
+        sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+        featured,
+        active,
+      })
+      .eq("slug", slug);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
+  }
+
+  revalidatePath("/admin/collections");
+  revalidatePath(`/collections/${slug}`);
+  revalidatePath("/collections");
+  revalidatePath("/");
+  return { ok: true, message: "Collection saved." };
+}
+
+export async function setCollectionProducts(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const slug = String(formData.get("slug") ?? "");
+  const ids = formData.getAll("product_ids").map(String).filter(Boolean);
+  if (!slug) return { ok: false, error: "Missing collection slug." };
+
+  try {
+    const supabase = createAdminClient();
+    // Clear then reinsert with positions.
+    const { error: delErr } = await supabase
+      .from("collection_products")
+      .delete()
+      .eq("collection_slug", slug);
+    if (delErr) return { ok: false, error: delErr.message };
+
+    if (ids.length > 0) {
+      const rows = ids.map((id, i) => ({
+        collection_slug: slug,
+        product_id: id,
+        position: i,
+      }));
+      const { error: insErr } = await supabase.from("collection_products").insert(rows);
+      if (insErr) return { ok: false, error: insErr.message };
+    }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Save failed." };
+  }
+
+  revalidatePath("/admin/collections");
+  revalidatePath(`/admin/collections/${slug}/edit`);
+  revalidatePath(`/collections/${slug}`);
+  revalidatePath("/collections");
+  return { ok: true, message: `${ids.length} product${ids.length === 1 ? "" : "s"} saved.` };
+}
+
+export async function deleteCollection(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+  const slug = String(formData.get("slug") ?? "");
+  if (!slug) return { ok: false, error: "Missing slug." };
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("collections").delete().eq("slug", slug);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Delete failed." };
+  }
+  revalidatePath("/admin/collections");
+  revalidatePath("/collections");
+  revalidatePath("/");
+  return { ok: true, message: "Collection deleted." };
+}
+
+// ─── Bundles (Complete the Look) ─────────────────────────────────────────────
+
+export async function createBundle(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const title = String(formData.get("title") ?? "").trim();
+  const combo_price_pkr = Number(formData.get("combo_price_pkr") ?? 0);
+  const active = formData.get("active") !== "off";
+  const ids = formData.getAll("product_ids").map(String).filter(Boolean);
+
+  if (!title) return { ok: false, error: "Title is required." };
+  if (!Number.isFinite(combo_price_pkr) || combo_price_pkr <= 0) {
+    return { ok: false, error: "Combo price must be greater than 0." };
+  }
+  if (ids.length < 2) return { ok: false, error: "Add at least 2 products to a bundle." };
+
+  try {
+    const supabase = createAdminClient();
+    const { data: inserted, error } = await supabase
+      .from("bundles")
+      .insert({ title, combo_price_pkr, active })
+      .select("id")
+      .single();
+    if (error || !inserted) return { ok: false, error: error?.message ?? "Insert failed." };
+
+    const rows = ids.map((product_id, i) => ({
+      bundle_id: inserted.id as string,
+      product_id,
+      position: i,
+    }));
+    const { error: linkErr } = await supabase.from("bundle_products").insert(rows);
+    if (linkErr) return { ok: false, error: linkErr.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Create failed." };
+  }
+
+  revalidatePath("/admin/bundles");
+  revalidatePath("/product");
+  return { ok: true, message: "Bundle created." };
+}
+
+export async function updateBundle(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const combo_price_pkr = Number(formData.get("combo_price_pkr") ?? 0);
+  const active = formData.get("active") !== "off";
+  const ids = formData.getAll("product_ids").map(String).filter(Boolean);
+
+  if (!id || !title) return { ok: false, error: "Missing bundle id or title." };
+  if (!Number.isFinite(combo_price_pkr) || combo_price_pkr <= 0) {
+    return { ok: false, error: "Combo price must be greater than 0." };
+  }
+  if (ids.length < 2) return { ok: false, error: "A bundle needs at least 2 products." };
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("bundles")
+      .update({ title, combo_price_pkr, active })
+      .eq("id", id);
+    if (error) return { ok: false, error: error.message };
+
+    await supabase.from("bundle_products").delete().eq("bundle_id", id);
+    const rows = ids.map((product_id, i) => ({ bundle_id: id, product_id, position: i }));
+    const { error: linkErr } = await supabase.from("bundle_products").insert(rows);
+    if (linkErr) return { ok: false, error: linkErr.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
+  }
+
+  revalidatePath("/admin/bundles");
+  revalidatePath("/product");
+  return { ok: true, message: "Bundle saved." };
+}
+
+export async function deleteBundle(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "Missing bundle id." };
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("bundles").delete().eq("id", id);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Delete failed." };
+  }
+  revalidatePath("/admin/bundles");
+  revalidatePath("/product");
+  return { ok: true, message: "Bundle deleted." };
+}
+
+// ─── Site settings ───────────────────────────────────────────────────────────
+
+export async function updateMarquee(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const raw = String(formData.get("items") ?? "").trim();
+  const items = raw
+    .split(/\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 20);
+
+  if (items.length === 0) return { ok: false, error: "Add at least one marquee item." };
+
+  try {
+    await setSetting(MARQUEE_KEY, items);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Save failed." };
+  }
+
+  revalidatePath("/admin/settings");
+  revalidatePath("/");
+  return { ok: true, message: `Saved ${items.length} marquee items.` };
+}
+
+// ─── Styles (mood boards) ────────────────────────────────────────────────────
+
+function validSlug(s: string) {
+  return /^[a-z0-9-]+$/.test(s) && s.length <= 40;
+}
+
+export async function createStyle(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
+  const label = String(formData.get("label") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+  const cover_image = String(formData.get("cover_image") ?? "").trim() || null;
+  const sort_order = Number(formData.get("sort_order") ?? 0);
+  const active = formData.get("active") !== "off";
+
+  if (!label) return { ok: false, error: "Label is required." };
+  if (!validSlug(slug)) {
+    return { ok: false, error: "Slug must use lowercase letters, numbers, and hyphens only." };
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("styles").insert({
+      slug,
+      label,
+      description,
+      cover_image,
+      sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+      active,
+    });
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Create failed." };
+  }
+
+  revalidatePath("/admin/styles");
+  revalidatePath(`/style/${slug}`);
+  return { ok: true, message: "Style created." };
+}
+
+export async function updateStyle(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+  const slug = String(formData.get("slug") ?? "");
+  const label = String(formData.get("label") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+  const cover_image = String(formData.get("cover_image") ?? "").trim() || null;
+  const sort_order = Number(formData.get("sort_order") ?? 0);
+  const active = formData.get("active") !== "off";
+  if (!slug || !label) return { ok: false, error: "Slug and label required." };
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("styles")
+      .update({
+        label,
+        description,
+        cover_image,
+        sort_order: Number.isFinite(sort_order) ? sort_order : 0,
+        active,
+      })
+      .eq("slug", slug);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Update failed." };
+  }
+  revalidatePath("/admin/styles");
+  revalidatePath(`/style/${slug}`);
+  return { ok: true, message: "Style saved." };
+}
+
+export async function deleteStyle(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+  const slug = String(formData.get("slug") ?? "");
+  if (!slug) return { ok: false, error: "Missing slug." };
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("styles").delete().eq("slug", slug);
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Delete failed." };
+  }
+  revalidatePath("/admin/styles");
+  return { ok: true, message: "Style deleted." };
 }

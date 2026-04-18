@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 import DevBanner from "@/components/ui/DevBanner";
+import { getLang } from "@/lib/i18n";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -59,9 +60,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const lang = await getLang();
   const orgJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -74,7 +76,7 @@ export default function RootLayout({
   const themeBootstrap = `(function(){try{var t=localStorage.getItem('closet-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
 
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang={lang} className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>

@@ -5,6 +5,7 @@ import { isAdminAuthed } from "@/lib/admin-auth";
 import { hasAdminEnv, createAdminClient } from "@/lib/supabase/admin";
 import { formatPKR } from "@/lib/format";
 import { waLink } from "@/lib/site-config";
+import { getBalancesForPhones, normalizePhoneKey, tierFor } from "@/lib/loyalty";
 
 type Row = {
   phone: string;
@@ -57,6 +58,9 @@ export default async function AdminCustomers() {
     } catch {}
   }
 
+  // Attach loyalty balances.
+  const balances = await getBalancesForPhones(rows.map((r) => r.phone));
+
   return (
     <>
       <div className="mb-8 flex items-end justify-between gap-4">
@@ -85,9 +89,10 @@ export default async function AdminCustomers() {
                 <tr>
                   <Th>Name</Th>
                   <Th>Phone</Th>
-                  <Th>Cities</Th>
+                  <Th>Tier</Th>
                   <Th className="text-right">Orders</Th>
                   <Th className="text-right">Lifetime</Th>
+                  <Th className="text-right">Coins</Th>
                   <Th>Last order</Th>
                   <Th>Actions</Th>
                 </tr>
@@ -95,6 +100,14 @@ export default async function AdminCustomers() {
               <tbody>
                 {rows.map((r) => {
                   const date = new Date(r.lastOrder);
+                  const balance = balances.get(normalizePhoneKey(r.phone)) ?? 0;
+                  const tier = tierFor(r.spend);
+                  const tierColor =
+                    tier === "Gold"
+                      ? "bg-amber-100 text-amber-900"
+                      : tier === "Silver"
+                        ? "bg-slate-200 text-slate-800"
+                        : "bg-orange-100 text-orange-900";
                   return (
                     <tr key={r.phone} className="border-b border-border last:border-0 hover:bg-cream/30">
                       <td className="px-4 py-3">
@@ -106,8 +119,13 @@ export default async function AdminCustomers() {
                         )}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs">{r.phone}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {Array.from(r.cities).join(", ")}
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${tierColor}`}>
+                          {tier}
+                        </span>
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {Array.from(r.cities).join(", ")}
+                        </p>
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums">
                         {r.orders}
@@ -119,6 +137,15 @@ export default async function AdminCustomers() {
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums font-semibold">
                         {formatPKR(r.spend)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums">
+                        {balance > 0 ? (
+                          <span className="inline-flex items-center gap-1 font-semibold text-ink">
+                            {balance}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {date.toLocaleDateString("en-PK", { month: "short", day: "numeric", year: "numeric" })}

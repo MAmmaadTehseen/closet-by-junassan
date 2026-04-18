@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Star } from "lucide-react";
 import type { Review } from "@/lib/reviews";
 
@@ -6,6 +7,7 @@ export default function Reviews({ reviews }: { reviews: Review[] }) {
 
   const avg = reviews.reduce((n, r) => n + r.rating, 0) / reviews.length;
   const rounded = Math.round(avg * 10) / 10;
+  const photos = reviews.filter((r) => r.photo_url);
 
   return (
     <section className="mt-16 border-t border-border pt-10">
@@ -31,6 +33,28 @@ export default function Reviews({ reviews }: { reviews: Review[] }) {
           <span className="text-muted-foreground">· {reviews.length} review{reviews.length === 1 ? "" : "s"}</span>
         </div>
       </div>
+
+      {photos.length > 0 && (
+        <div className="mt-6">
+          <p className="eyebrow mb-3">Worn by Closet</p>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
+            {photos.slice(0, 12).map((r) => (
+              <div
+                key={r.id}
+                className="relative aspect-square overflow-hidden rounded-xl bg-cream"
+              >
+                <Image
+                  src={r.photo_url!}
+                  alt={`Photo by ${r.author_name}`}
+                  fill
+                  sizes="(max-width: 640px) 33vw, 150px"
+                  className="object-cover transition-transform duration-700 hover:scale-105"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {reviews.map((r) => (

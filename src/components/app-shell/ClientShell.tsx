@@ -16,6 +16,12 @@ const SocialProof = dynamic(() => import("@/components/ui/SocialProof"), {
 const ExitIntent = dynamic(() => import("@/components/ui/ExitIntent"), {
   ssr: false,
 });
+const CursorCompanion = dynamic(() => import("@/components/ui/CursorCompanion"), {
+  ssr: false,
+});
+const InstallPrompt = dynamic(() => import("@/components/ui/InstallPrompt"), {
+  ssr: false,
+});
 
 export default function ClientShell({ products }: { products: Product[] }) {
   return (
@@ -27,6 +33,8 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <BackToTop />
       <SocialProof />
       <ExitIntent />
+      <CursorCompanion />
+      <InstallPrompt />
     </>
   );
 }

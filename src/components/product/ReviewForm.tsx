@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState, useState } from "react";
-import { Star } from "lucide-react";
-import { submitReview, type ReviewSubmitResult } from "@/lib/review-actions";
+import { Camera, Loader2, Star, X } from "lucide-react";
+import { submitReview, uploadReviewPhoto, type ReviewSubmitResult } from "@/lib/review-actions";
 
 export default function ReviewForm({
   code,
@@ -14,6 +15,18 @@ export default function ReviewForm({
   const [state, formAction] = useActionState<ReviewSubmitResult | null, FormData>(submitReview, null);
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
+  const [photoUrl, setPhotoUrl] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+
+  const onPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const result = await uploadReviewPhoto(fd);
+    setUploading(false);
+    if ("url" in result) setPhotoUrl(result.url);
+  };
 
   if (state?.ok) {
     return (
@@ -28,6 +41,7 @@ export default function ReviewForm({
       <input type="hidden" name="code" value={code} />
       <input type="hidden" name="product_id" value={productId} />
       <input type="hidden" name="rating" value={rating} />
+      <input type="hidden" name="photo_url" value={photoUrl} />
 
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -79,6 +93,41 @@ export default function ReviewForm({
           className="mt-1 w-full resize-none rounded-lg border border-border bg-paper px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ink"
           placeholder="Fit, fabric, colour, anything you'd tell a friend…"
         />
+      </div>
+
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Add a photo (optional)
+        </p>
+        {photoUrl ? (
+          <div className="mt-2 flex items-center gap-3">
+            <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-border">
+              <Image src={photoUrl} alt="" fill sizes="80px" className="object-cover" />
+            </div>
+            <button
+              type="button"
+              onClick={() => setPhotoUrl("")}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-accent-red"
+            >
+              <X className="h-3 w-3" /> Remove
+            </button>
+          </div>
+        ) : (
+          <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-full border border-dashed border-border px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:border-ink hover:text-ink">
+            {uploading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Camera className="h-3.5 w-3.5" />
+            )}
+            {uploading ? "Uploading…" : "Upload photo"}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => onPhoto(e.target.files?.[0])}
+            />
+          </label>
+        )}
       </div>
 
       {state && !state.ok && (

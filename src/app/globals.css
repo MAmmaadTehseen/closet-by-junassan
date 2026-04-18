@@ -216,6 +216,106 @@ body {
   animation: check-draw 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
 }
 
+/* Scroll-driven word reveal — native CSS scroll-timeline. Graceful fallback: words fade in via intersection observer (.scroll-reveal-fallback.is-visible). */
+.scroll-reveal > span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.4em);
+}
+
+@supports (animation-timeline: view()) {
+  .scroll-reveal > span {
+    animation: scroll-word-in linear both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 40%;
+  }
+  @keyframes scroll-word-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Fallback for browsers without scroll-timeline (Firefox older, Safari older). */
+@supports not (animation-timeline: view()) {
+  .scroll-reveal.is-visible > span {
+    animation: scroll-word-in-fallback 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes scroll-word-in-fallback {
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Progressive-blur sticky header — stacked masks for smoother falloff */
+.progressive-blur {
+  position: relative;
+}
+.progressive-blur::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--paper);
+  opacity: 0.82;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  mask-image: linear-gradient(to bottom, black 0, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black 70%, transparent 100%);
+  pointer-events: none;
+}
+.progressive-blur::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -36px;
+  height: 36px;
+  z-index: -1;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  mask-image: linear-gradient(to bottom, black 0, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0, transparent 100%);
+  pointer-events: none;
+}
+
+/* Offer slider — branded range input */
+.offer-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--ink) 0%,
+    var(--ink) var(--progress, 50%),
+    var(--line) var(--progress, 50%),
+    var(--line) 100%
+  );
+}
+.offer-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  cursor: grab;
+  transition: transform 0.15s ease-out;
+}
+.offer-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.12);
+}
+.offer-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  cursor: grab;
+}
+
 @keyframes cart-bump {
   0%, 100% { transform: scale(1); }
   25% { transform: scale(1.18) rotate(-6deg); }

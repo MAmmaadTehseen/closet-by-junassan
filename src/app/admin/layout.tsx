@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Boxes, ClipboardList, LogOut, LayoutDashboard, Tag, Users, Sparkles, Star } from "lucide-react";
+import { Boxes, ClipboardList, LogOut, LayoutDashboard, Tag, Users, Sparkles, Star, Layers, Package, Settings, Activity, MessagesSquare, Palette } from "lucide-react";
 import { isAdminAuthed, getAdminPassword } from "@/lib/admin-auth";
 import { logoutAction } from "@/lib/admin-actions";
 import { hasAdminEnv } from "@/lib/supabase/admin";
@@ -54,7 +54,13 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           <AdminLink href="/admin/orders" icon={<ClipboardList className="h-4 w-4" />} label="Orders" />
           <AdminLink href="/admin/customers" icon={<Users className="h-4 w-4" />} label="Customers" />
           <AdminLink href="/admin/drops" icon={<Sparkles className="h-4 w-4" />} label="Drops" />
+          <AdminLink href="/admin/collections" icon={<Layers className="h-4 w-4" />} label="Collections" />
+          <AdminLink href="/admin/bundles" icon={<Package className="h-4 w-4" />} label="Bundles" />
+          <AdminLink href="/admin/styles" icon={<Palette className="h-4 w-4" />} label="Styles" />
           <AdminLink href="/admin/reviews" icon={<Star className="h-4 w-4" />} label="Reviews" />
+          <AdminLink href="/admin/qa" icon={<MessagesSquare className="h-4 w-4" />} label="Q&A" />
+          <AdminLink href="/admin/activity" icon={<Activity className="h-4 w-4" />} label="Activity" />
+          <AdminLink href="/admin/settings" icon={<Settings className="h-4 w-4" />} label="Settings" />
         </nav>
         <form action={logoutAction} className="border-t border-border p-4">
           <button

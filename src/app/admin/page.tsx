@@ -18,6 +18,7 @@ import {
   getRevenueAndOrdersByDay,
   getTopProducts,
   getStatusMix,
+  getProductVelocity,
 } from "@/lib/admin-analytics";
 import AreaChart from "@/components/admin/charts/AreaChart";
 import BarChart from "@/components/admin/charts/BarChart";
@@ -35,11 +36,12 @@ const STATUS_COLORS: Record<string, string> = {
 export default async function AdminDashboard() {
   if (!(await isAdminAuthed())) redirect("/admin/login");
 
-  const [products, { revenue, orders }, topProducts, statusMix] = await Promise.all([
+  const [products, { revenue, orders }, topProducts, statusMix, velocity] = await Promise.all([
     fetchProducts({ limit: 200 }),
     getRevenueAndOrdersByDay(30),
     getTopProducts(5),
     getStatusMix(),
+    getProductVelocity(),
   ]);
 
   const revenue30 = revenue.reduce((n, d) => n + d.value, 0);
@@ -162,6 +164,59 @@ export default async function AdminDashboard() {
           <Donut data={categorySlices} />
         </Panel>
       </div>
+
+      {(velocity.runningLow.length > 0 || velocity.slowMovers.length > 0) && (
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <Panel
+            title="Running low"
+            subtitle="Less than 2 weeks of cover at current velocity"
+          >
+            {velocity.runningLow.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nothing trending low — you&apos;re good.</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {velocity.runningLow.map((r) => (
+                  <li key={r.product_id} className="flex items-center justify-between gap-3">
+                    <Link
+                      href={`/admin/products/${r.product_id}/edit`}
+                      className="line-clamp-1 font-medium hover:text-ink"
+                    >
+                      {r.name}
+                    </Link>
+                    <span className="shrink-0 text-xs tabular-nums">
+                      <span className="font-semibold text-accent-red">
+                        {r.weeks_of_cover}w cover
+                      </span>{" "}
+                      <span className="text-muted-foreground">· {r.in_stock} left · {r.units_30d} sold</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+          <Panel title="Slow movers" subtitle="No sales in 30 days — consider a discount">
+            {velocity.slowMovers.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Everything&apos;s moving 🎉</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {velocity.slowMovers.map((r) => (
+                  <li key={r.product_id} className="flex items-center justify-between gap-3">
+                    <Link
+                      href={`/admin/products/${r.product_id}/edit`}
+                      className="line-clamp-1 font-medium hover:text-ink"
+                    >
+                      {r.name}
+                    </Link>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {r.in_stock} in stock
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+        </div>
+      )}
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <AdminCard href="/admin/products" icon={<Boxes className="h-4 w-4" />} title="Products" />
