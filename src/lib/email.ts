@@ -143,3 +143,27 @@ export async function sendStatusUpdate(
     html: base(headline, body),
   });
 }
+
+export async function sendCartRecovery(ctx: {
+  email: string;
+  token: string;
+  items: LineItem[];
+}) {
+  if (!isConfigured() || !ctx.email) return;
+  const link = `${siteConfig.url}/cart/recover/${ctx.token}`;
+  const total = ctx.items.reduce((n, i) => n + i.price_pkr * i.quantity, 0);
+  const body = `
+    <p style="font-size:14px;color:#6b6357;text-transform:uppercase;letter-spacing:0.18em;margin:0 0 6px;">Still thinking it over?</p>
+    <h2 style="font-family:Georgia,serif;font-size:32px;margin:0 0 14px;">Your bag is waiting.</h2>
+    <p style="font-size:14px;line-height:1.6;">We&apos;ve saved your picks — restore them in one tap and checkout where you left off.</p>
+    ${itemsTable(ctx.items)}
+    <p style="display:flex;justify-content:space-between;font-size:16px;font-weight:600;margin:8px 0 24px;"><span>Bag total</span><span>${formatPKR(total)}</span></p>
+    <a href="${link}" style="display:inline-block;margin:12px 0 8px;padding:14px 28px;background:#0a0a0a;color:#faf9f6;text-decoration:none;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;">Restore my bag</a>
+    <p style="font-size:11px;color:#6b6357;margin-top:20px;">Sold out? We&apos;ll let you know. Prices may adjust — original terms apply.</p>
+  `;
+  await send({
+    to: ctx.email,
+    subject: `Your Closet bag is waiting`,
+    html: base("Your bag is waiting", body),
+  });
+}

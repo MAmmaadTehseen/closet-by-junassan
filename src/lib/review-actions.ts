@@ -3,7 +3,33 @@
 import { revalidatePath } from "next/cache";
 import { hasAdminEnv, createAdminClient } from "@/lib/supabase/admin";
 
+const UGC_BUCKET = "review-photos";
+
 export type ReviewSubmitResult = { ok: true; message: string } | { ok: false; error: string };
+export type UploadResult = { url: string } | { error: string };
+
+/** Upload a customer's review photo. Called directly from a client component. */
+export async function uploadReviewPhoto(formData: FormData): Promise<UploadResult> {
+  if (!hasAdminEnv()) return { error: "Uploads not configured." };
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
+  if (file.size > 5 * 1024 * 1024) return { error: "File exceeds 5 MB limit." };
+  const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const fileName = `${crypto.randomUUID()}.${ext}`;
+
+  try {
+    const supabase = createAdminClient();
+    // Ensure bucket exists (best-effort; ignored if already there).
+    const { error: upErr } = await supabase.storage
+      .from(UGC_BUCKET)
+      .upload(fileName, file, { contentType: file.type, upsert: false });
+    if (upErr) return { error: upErr.message };
+    const { data } = supabase.storage.from(UGC_BUCKET).getPublicUrl(fileName);
+    return { url: data.publicUrl };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Upload failed." };
+  }
+}
 
 export async function submitReview(
   _prev: ReviewSubmitResult | null,
@@ -16,6 +42,7 @@ export async function submitReview(
   const rating = Number(formData.get("rating") ?? 0);
   const body = String(formData.get("body") ?? "").trim();
   const author_name = String(formData.get("author_name") ?? "").trim();
+  const photo_url = String(formData.get("photo_url") ?? "").trim() || null;
 
   if (!code || !product_id) return { ok: false, error: "Missing order or product." };
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
@@ -49,6 +76,7 @@ export async function submitReview(
         rating,
         body,
         author_name,
+        photo_url,
         approved: false,
       },
       { onConflict: "order_id,product_id" },

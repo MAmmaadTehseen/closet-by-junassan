@@ -4,8 +4,11 @@ import { Phone, Package, Truck, MessageCircle, MapPin } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/brand-icons";
 import ClearCartOnSuccess from "@/components/checkout/ClearCartOnSuccess";
 import CopyCode from "@/components/checkout/CopyCode";
+import ReferralShare from "@/components/checkout/ReferralShare";
 import { siteConfig, waLink } from "@/lib/site-config";
 import { getDeliveryWindow } from "@/lib/delivery";
+import { hasAdminEnv, createAdminClient } from "@/lib/supabase/admin";
+import { ensureReferralCode } from "@/lib/referrals";
 
 export const metadata: Metadata = {
   title: "Order Placed",
@@ -36,6 +39,20 @@ const NEXT_STEPS = [
 export default async function CheckoutSuccessPage({ searchParams }: { searchParams: SP }) {
   const { o } = await searchParams;
   const code = o && /^CBJ-[A-Z0-9]+$/.test(o) ? o : null;
+
+  // Look up or create the referral code for this buyer.
+  let referralCode: string | null = null;
+  if (code && hasAdminEnv()) {
+    try {
+      const supabase = createAdminClient();
+      const { data } = await supabase
+        .from("orders")
+        .select("phone")
+        .eq("public_code", code)
+        .maybeSingle();
+      if (data?.phone) referralCode = await ensureReferralCode(data.phone as string);
+    } catch {}
+  }
 
   return (
     <div className="mx-auto max-w-xl px-4 py-20 sm:px-6">
@@ -128,6 +145,10 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
           Continue shopping
         </Link>
       </div>
+
+      {referralCode && (
+        <ReferralShare code={referralCode} shareUrl={`${siteConfig.url}/?ref=${referralCode}`} />
+      )}
 
       <a
         href={siteConfig.socials.instagram}

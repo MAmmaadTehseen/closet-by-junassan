@@ -55,6 +55,12 @@ export default async function AdminDropsPage() {
           <Field label="CTA link">
             <input name="cta_href" className={input} placeholder="/shop" />
           </Field>
+          <Field label="Goes live (optional)">
+            <input name="goes_live_at" type="datetime-local" className={input} />
+          </Field>
+          <Field label="Ends (optional)">
+            <input name="ends_at" type="datetime-local" className={input} />
+          </Field>
           <label className="mt-2 flex items-center gap-2 text-sm">
             <input type="checkbox" name="active" defaultChecked className="h-4 w-4 rounded border-border accent-ink" />
             Active (visible on homepage)
@@ -121,6 +127,22 @@ export default async function AdminDropsPage() {
                   <Field label="CTA link">
                     <input name="cta_href" defaultValue={d.cta_href ?? ""} className={input} />
                   </Field>
+                  <Field label="Goes live (optional)">
+                    <input
+                      name="goes_live_at"
+                      type="datetime-local"
+                      defaultValue={toLocalValue(d.goes_live_at)}
+                      className={input}
+                    />
+                  </Field>
+                  <Field label="Ends (optional)">
+                    <input
+                      name="ends_at"
+                      type="datetime-local"
+                      defaultValue={toLocalValue(d.ends_at)}
+                      className={input}
+                    />
+                  </Field>
                   <label className="mt-2 flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
@@ -171,3 +193,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const input =
   "rounded-lg border border-border bg-paper px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ink";
+
+function toLocalValue(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}

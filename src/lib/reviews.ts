@@ -8,6 +8,7 @@ export interface Review {
   rating: number;
   body: string;
   author_name: string;
+  photo_url: string | null;
   approved: boolean;
   created_at: string;
 }

@@ -6,8 +6,12 @@ import ProductGrid from "@/components/product/ProductGrid";
 import RecentlyViewed from "@/components/product/RecentlyViewed";
 import Breadcrumbs from "@/components/product/Breadcrumbs";
 import Reviews from "@/components/product/Reviews";
+import BundleStrip from "@/components/product/BundleStrip";
+import QA from "@/components/product/QA";
 import { fetchProductBySlug, fetchRelated, fetchProducts } from "@/lib/products";
 import { fetchApprovedReviews } from "@/lib/reviews";
+import { fetchBundlesForProduct } from "@/lib/bundles";
+import { fetchAnsweredQuestions } from "@/lib/qa";
 import { siteConfig } from "@/lib/site-config";
 import { CATEGORIES } from "@/lib/types";
 
@@ -35,10 +39,12 @@ export default async function ProductPage({ params }: { params: Params }) {
   const product = await fetchProductBySlug(slug);
   if (!product) notFound();
 
-  const [related, allProducts, reviews] = await Promise.all([
+  const [related, allProducts, reviews, bundles, questions] = await Promise.all([
     fetchRelated(product),
     fetchProducts({ limit: 60 }),
     fetchApprovedReviews(product.id),
+    fetchBundlesForProduct(product.id),
+    fetchAnsweredQuestions(product.id),
   ]);
 
   const category = CATEGORIES.find((c) => c.slug === product.category);
@@ -119,11 +125,23 @@ export default async function ProductPage({ params }: { params: Params }) {
         </div>
       </div>
 
+      {bundles.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pb-4 sm:px-6">
+          {bundles.slice(0, 2).map((b) => (
+            <BundleStrip key={b.id} bundle={b} />
+          ))}
+        </section>
+      )}
+
       {reviews.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
           <Reviews reviews={reviews} />
         </section>
       )}
+
+      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
+        <QA productId={product.id} questions={questions} />
+      </section>
 
       {related.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
@@ -145,6 +163,25 @@ export default async function ProductPage({ params }: { params: Params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
+      {questions.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: questions.map((q) => ({
+                "@type": "Question",
+                name: q.body,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: q.answer,
+                },
+              })),
+            }),
+          }}
+        />
+      )}
     </>
   );
 }

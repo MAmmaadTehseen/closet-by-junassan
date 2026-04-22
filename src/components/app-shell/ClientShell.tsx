@@ -31,6 +31,8 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <FloatingWhatsApp />
       <SocialProof />
       <ExitIntent />
+      <CursorCompanion />
+      <InstallPrompt />
     </>
   );
 }

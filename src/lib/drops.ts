@@ -11,6 +11,8 @@ export interface Drop {
   sort_order: number;
   active: boolean;
   published_at: string;
+  goes_live_at: string | null;
+  ends_at: string | null;
 }
 
 function publicClient() {

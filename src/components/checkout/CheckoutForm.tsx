@@ -7,6 +7,7 @@ import { ShieldCheck, Phone, Undo2, Banknote, ArrowRight, ArrowLeft } from "luci
 import { useCart } from "@/lib/cart-store";
 import { formatPKR } from "@/lib/format";
 import { createOrder } from "@/lib/orders";
+import { saveCartDraft } from "@/lib/cart-recovery";
 import { PK_CITIES } from "@/lib/cities-pk";
 import { PHONE_RE, normalizePhone } from "@/lib/validators";
 import { siteConfig } from "@/lib/site-config";
@@ -153,6 +154,12 @@ export default function CheckoutForm() {
               type="email"
               value={draft.email}
               onChange={(v) => setDraft((d) => ({ ...d, email: v }))}
+              onBlur={() => {
+                const e = draft.email?.trim().toLowerCase();
+                if (e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && items.length > 0) {
+                  void saveCartDraft(e, items);
+                }
+              }}
               placeholder="you@example.com"
               autoComplete="email"
               hint="For order confirmation and tracking updates."
@@ -330,6 +337,7 @@ function Field({
   name,
   value,
   onChange,
+  onBlur,
   type = "text",
   required,
   textarea,
@@ -344,6 +352,7 @@ function Field({
   name: string;
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
   type?: string;
   required?: boolean;
   textarea?: boolean;
@@ -367,6 +376,7 @@ function Field({
           name={name}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           required={required}
           rows={3}
           placeholder={placeholder}
@@ -381,6 +391,7 @@ function Field({
           name={name}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           required={required}
           placeholder={placeholder}
           list={list}

@@ -61,6 +61,7 @@ export default function Gallery({
       <div className="relative flex-1">
         <div
           data-gallery-hero
+          data-cursor="Expand"
           className="relative aspect-4/5 w-full cursor-zoom-in overflow-hidden rounded-2xl bg-cream"
           onMouseMove={onMove}
           onMouseEnter={() => setZoomed(true)}

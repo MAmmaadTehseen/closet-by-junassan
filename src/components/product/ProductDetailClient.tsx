@@ -13,6 +13,7 @@ import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
 import { formatPKR, seededRandom } from "@/lib/format";
 import { waLink, siteConfig } from "@/lib/site-config";
+import { Coins } from "lucide-react";
 import type { Product } from "@/lib/types";
 
 export default function ProductDetailClient({ product }: { product: Product }) {
@@ -91,6 +92,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             You save {formatPKR(savings)}
           </p>
         )}
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-900">
+          <Coins className="h-3 w-3" /> Earn {Math.floor(product.price_pkr / 10)} coins
+        </span>
       </div>
 
       {!soldOut && product.stock <= 3 && (
@@ -156,7 +160,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {soldOut ? (
         <RestockNotify productName={product.name} />
       ) : (
-        <AddToCartButton product={product} selectedSize={selectedSize} />
+        <>
+          <AddToCartButton product={product} selectedSize={selectedSize} />
+          <div className="flex items-center justify-between gap-3">
+            <MakeOffer product={product} />
+            <PriceDropSubscribe
+              productId={product.id}
+              productName={product.name}
+              currentPrice={product.price_pkr}
+            />
+          </div>
+        </>
       )}
 
       <div className="flex items-center gap-2">

@@ -23,7 +23,7 @@ export default function ProductCard({
       : 0;
 
   return (
-    <div className="group relative">
+    <div className="group relative" data-cursor="View">
       <Link href={`/product/${product.slug}`} className="block focus-ring">
         <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-cream">
           {product.images[0] && (
