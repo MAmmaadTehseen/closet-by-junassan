@@ -12,6 +12,7 @@ import { PHONE_RE, normalizePhone } from "@/lib/validators";
 import { siteConfig } from "@/lib/site-config";
 import { getDeliveryWindow } from "@/lib/delivery";
 import { toast } from "@/components/ui/Toaster";
+import GiftNote from "@/components/checkout/GiftNote";
 
 const STORAGE_KEY = "closet-checkout-draft";
 
@@ -22,9 +23,18 @@ interface Draft {
   city: string;
   address: string;
   notes: string;
+  giftNote: string;
 }
 
-const EMPTY: Draft = { full_name: "", phone: "", email: "", city: "", address: "", notes: "" };
+const EMPTY: Draft = {
+  full_name: "",
+  phone: "",
+  email: "",
+  city: "",
+  address: "",
+  notes: "",
+  giftNote: "",
+};
 
 export default function CheckoutForm() {
   const items = useCart((s) => s.items);
@@ -98,13 +108,20 @@ export default function CheckoutForm() {
       "website",
     ) as HTMLInputElement | null;
 
+    const merged = [
+      draft.notes?.trim(),
+      draft.giftNote?.trim() && `Gift note: ${draft.giftNote.trim()}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
     startTransition(async () => {
       const result = await createOrder({
         full_name: draft.full_name,
         phone: normalizePhone(draft.phone),
         city: draft.city,
         address: draft.address,
-        notes: draft.notes || undefined,
+        notes: merged || undefined,
         email: draft.email?.trim() || undefined,
         items,
         honeypot: honeypot?.value ?? "",
@@ -188,6 +205,11 @@ export default function CheckoutForm() {
               value={draft.notes}
               onChange={(v) => setDraft((d) => ({ ...d, notes: v }))}
               textarea
+            />
+
+            <GiftNote
+              value={draft.giftNote}
+              onChange={(v) => setDraft((d) => ({ ...d, giftNote: v }))}
             />
 
             <div className="rounded-2xl border border-ink bg-paper p-5">

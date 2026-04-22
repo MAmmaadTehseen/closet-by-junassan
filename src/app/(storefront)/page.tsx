@@ -8,6 +8,10 @@ import HowCodWorks from "@/components/home/HowCodWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
 import StoriesBar from "@/components/home/StoriesBar";
+import BrandsMarquee from "@/components/home/BrandsMarquee";
+import ShopTheLook from "@/components/home/ShopTheLook";
+import TrustStrip from "@/components/home/TrustStrip";
+import BundleBanner from "@/components/home/BundleBanner";
 import { fetchProducts } from "@/lib/products";
 import { fetchCategories } from "@/lib/categories";
 import { fetchActiveDrops } from "@/lib/drops";
@@ -30,10 +34,15 @@ export default async function HomePage() {
     categoryCounts[p.category] = (categoryCounts[p.category] ?? 0) + 1;
   }
 
+  const lookPieces = [trending[0], under2k[0], limited[0], newArrivals[1]].filter(
+    (p): p is NonNullable<typeof p> => Boolean(p),
+  );
+
   return (
     <>
       <Hero />
       <StoriesBar drops={drops} />
+      <BrandsMarquee products={all} />
       <InstagramMosaic products={newArrivals} />
       <CategoryGrid categories={categories} counts={categoryCounts} />
       <ProductRail
@@ -49,13 +58,16 @@ export default async function HomePage() {
         products={trending}
         href="/shop"
       />
+      {lookPieces.length >= 2 && <ShopTheLook products={lookPieces} />}
       <ProductRail
         eyebrow="05 · Act fast"
         title="Limited Stock"
         products={limited}
         href="/shop"
       />
+      <BundleBanner />
       <HowCodWorks />
+      <TrustStrip />
       <CodBanner />
       <Testimonials />
       <Newsletter />

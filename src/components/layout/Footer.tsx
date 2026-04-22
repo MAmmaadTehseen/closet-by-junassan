@@ -3,6 +3,7 @@ import { siteConfig, waLink } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import { MessageCircle } from "lucide-react";
 import type { CategoryDef } from "@/lib/categories";
+import CurrencySelector from "@/components/ui/CurrencySelector";
 
 export default function Footer({ categories = [] }: { categories?: CategoryDef[] }) {
   return (
@@ -92,7 +93,14 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center gap-3 border-t border-border pt-10 text-center">
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
+          <p className="text-[11px] text-muted-foreground">
+            Prices settle in PKR on delivery — change display currency for quick reference.
+          </p>
+          <CurrencySelector />
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-3 pt-4 text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             {siteConfig.shipping.banner}
           </p>

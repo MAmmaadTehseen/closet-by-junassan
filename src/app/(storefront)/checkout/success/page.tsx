@@ -4,6 +4,8 @@ import { Phone, Package, Truck, MessageCircle, MapPin } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/brand-icons";
 import ClearCartOnSuccess from "@/components/checkout/ClearCartOnSuccess";
 import CopyCode from "@/components/checkout/CopyCode";
+import Confetti from "@/components/ui/Confetti";
+import OrderTimeline from "@/components/order/OrderTimeline";
 import { siteConfig, waLink } from "@/lib/site-config";
 import { getDeliveryWindow } from "@/lib/delivery";
 
@@ -40,6 +42,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
   return (
     <div className="mx-auto max-w-xl px-4 py-20 sm:px-6">
       <ClearCartOnSuccess />
+      <Confetti />
 
       {/* Animated checkmark */}
       <div className="flex justify-center">
@@ -85,8 +88,14 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
         </div>
       )}
 
+      {/* Timeline — visual progress */}
+      <div className="mt-10 rounded-2xl border border-border bg-paper p-6">
+        <p className="eyebrow mb-5">Your journey</p>
+        <OrderTimeline active="placed" />
+      </div>
+
       {/* What happens next */}
-      <div className="mt-10">
+      <div className="mt-8">
         <p className="eyebrow mb-5 text-center">What happens next</p>
         <ol className="space-y-3">
           {NEXT_STEPS.map((step, i) => (

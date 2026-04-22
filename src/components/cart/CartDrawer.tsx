@@ -7,14 +7,21 @@ import Drawer from "@/components/ui/Drawer";
 import { useCart } from "@/lib/cart-store";
 import { useUi } from "@/lib/ui-store";
 import { formatPKR } from "@/lib/format";
+import type { Product } from "@/lib/types";
+import CartPerksBar from "@/components/cart/CartPerksBar";
 
-export default function CartDrawer() {
+export default function CartDrawer({ products = [] }: { products?: Product[] }) {
   const open = useUi((s) => s.cartOpen);
   const close = useUi((s) => s.closeCart);
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const subtotal = items.reduce((n, i) => n + i.price_pkr * i.quantity, 0);
+
+  const originals: Record<string, number> = {};
+  for (const p of products) {
+    if (p.original_price_pkr) originals[p.id] = p.original_price_pkr;
+  }
 
   return (
     <Drawer open={open} onClose={close} title="Your Bag">
@@ -97,6 +104,9 @@ export default function CartDrawer() {
           </ul>
 
           <div className="border-t border-border bg-cream/50 p-5">
+            <div className="mb-3">
+              <CartPerksBar originals={originals} compact />
+            </div>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="text-base font-semibold">{formatPKR(subtotal)}</span>

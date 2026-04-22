@@ -7,6 +7,9 @@ import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
+import PriceAlertButton from "./PriceAlertButton";
+import SizeRecommender from "./SizeRecommender";
+import ReadingProgress from "@/components/ui/ReadingProgress";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
@@ -55,6 +58,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadingProgress />
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -131,8 +135,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               </button>
             ))}
           </div>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <SizeGuideModal category={product.category} />
+          </div>
+          <div className="mt-3">
+            <SizeRecommender listedSize={product.size} />
           </div>
         </div>
       )}
@@ -142,7 +149,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {soldOut ? (
         <RestockNotify productName={product.name} />
       ) : (
-        <AddToCartButton product={product} selectedSize={selectedSize} />
+        <>
+          <AddToCartButton product={product} selectedSize={selectedSize} />
+          <PriceAlertButton productId={product.id} currentPrice={product.price_pkr} />
+        </>
       )}
 
       <div className="flex items-center gap-2">

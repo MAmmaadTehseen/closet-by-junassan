@@ -18,6 +18,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
     { href: "/shop", label: "Shop" },
     ...categories.map((c) => ({ href: `/category/${c.slug}`, label: c.label })),
     { href: "/deals", label: "Deals" },
+    { href: "/compare", label: "Compare" },
   ];
   const pathname = usePathname();
   const [open, setOpen] = useState(false);

@@ -9,8 +9,13 @@ import { useWishlist } from "@/lib/wishlist-store";
 import { toast } from "@/components/ui/Toaster";
 import { applyCoupon, type Coupon } from "@/lib/coupons";
 import { formatPKR } from "@/lib/format";
+import CartPerksBar from "@/components/cart/CartPerksBar";
 
-export default function CartView() {
+export default function CartView({
+  originals = {},
+}: {
+  originals?: Record<string, number>;
+}) {
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
@@ -135,6 +140,8 @@ export default function CartView() {
 
       <aside className="h-fit space-y-5 rounded-2xl border border-border bg-cream/40 p-6 lg:sticky lg:top-28">
         <h2 className="font-display text-xl font-semibold">Order Summary</h2>
+
+        <CartPerksBar originals={originals} />
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
