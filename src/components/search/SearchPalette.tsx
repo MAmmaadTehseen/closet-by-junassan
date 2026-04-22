@@ -3,16 +3,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, X, ArrowRight } from "lucide-react";
+import { Search, X, ArrowRight, TrendingUp, Clock, Trash2 } from "lucide-react";
 import { useUi } from "@/lib/ui-store";
 import { useKeyboard } from "@/lib/hooks/use-keyboard";
 import { formatPKR } from "@/lib/format";
+import {
+  useSearchHistory,
+  TRENDING_SEARCHES,
+} from "@/lib/search-history-store";
 import type { Product } from "@/lib/types";
 
 export default function SearchPalette({ products }: { products: Product[] }) {
   const open = useUi((s) => s.searchOpen);
   const openSearch = useUi((s) => s.openSearch);
   const closeSearch = useUi((s) => s.closeSearch);
+  const recent = useSearchHistory((s) => s.recent);
+  const pushRecent = useSearchHistory((s) => s.push);
+  const clearRecent = useSearchHistory((s) => s.clear);
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -70,8 +77,15 @@ export default function SearchPalette({ products }: { products: Product[] }) {
       setActive((a) => Math.max(a - 1, 0));
     }
     if (e.key === "Enter" && results[active]) {
+      if (q.trim()) pushRecent(q);
       window.location.href = `/product/${results[active].slug}`;
     }
+  };
+
+  const runSearch = (term: string) => {
+    setQ(term);
+    pushRecent(term);
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   return (
@@ -97,6 +111,50 @@ export default function SearchPalette({ products }: { products: Product[] }) {
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto">
+          {!q.trim() && (recent.length > 0 || TRENDING_SEARCHES.length > 0) && (
+            <div className="border-b border-border px-5 py-4">
+              {recent.length > 0 && (
+                <div className="mb-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      <Clock className="h-3 w-3" /> Recent
+                    </p>
+                    <button
+                      onClick={clearRecent}
+                      className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-accent-red"
+                    >
+                      <Trash2 className="h-3 w-3" /> Clear
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recent.map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => runSearch(r)}
+                        className="rounded-full border border-border bg-paper px-3 py-1 text-xs text-ink hover:border-ink"
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <TrendingUp className="h-3 w-3" /> Trending now
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {TRENDING_SEARCHES.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => runSearch(t)}
+                    className="rounded-full bg-cream px-3 py-1 text-xs text-ink hover:bg-ink hover:text-paper"
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {results.length === 0 ? (
             <p className="px-5 py-10 text-center text-sm text-muted-foreground">
               No results. Try another keyword.

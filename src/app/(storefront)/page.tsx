@@ -8,6 +8,10 @@ import HowCodWorks from "@/components/home/HowCodWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
 import StoriesBar from "@/components/home/StoriesBar";
+import FlashSaleBanner from "@/components/home/FlashSaleBanner";
+import BundleBanner from "@/components/home/BundleBanner";
+import ImpactCounter from "@/components/home/ImpactCounter";
+import RecentlyViewed from "@/components/product/RecentlyViewed";
 import { fetchProducts } from "@/lib/products";
 import { fetchCategories } from "@/lib/categories";
 import { fetchActiveDrops } from "@/lib/drops";
@@ -36,6 +40,7 @@ export default async function HomePage() {
       <StoriesBar drops={drops} />
       <InstagramMosaic products={newArrivals} />
       <CategoryGrid categories={categories} counts={categoryCounts} />
+      <FlashSaleBanner />
       <ProductRail
         eyebrow="03 · Best for your rupee"
         title="Under 2000 PKR ⭐"
@@ -49,12 +54,15 @@ export default async function HomePage() {
         products={trending}
         href="/shop"
       />
+      <BundleBanner />
       <ProductRail
         eyebrow="05 · Act fast"
         title="Limited Stock"
         products={limited}
         href="/shop"
       />
+      <RecentlyViewed allProducts={all} />
+      <ImpactCounter />
       <HowCodWorks />
       <CodBanner />
       <Testimonials />

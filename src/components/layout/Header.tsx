@@ -11,6 +11,7 @@ import { siteConfig } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import CurrencySwitcher from "@/components/ui/CurrencySwitcher";
 import type { CategoryDef } from "@/lib/categories";
 
 export default function Header({ categories = [] }: { categories?: CategoryDef[] }) {
@@ -83,6 +84,9 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
           </nav>
 
           <div className="flex items-center gap-1">
+            <div className="hidden md:block">
+              <CurrencySwitcher />
+            </div>
             <button
               onClick={openSearch}
               className="rounded-full p-2.5 text-ink hover:bg-cream focus-ring"
@@ -167,6 +171,20 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
                 className="flex items-center gap-2 border-b border-border py-4 text-base font-medium"
               >
                 <Heart className="h-4 w-4" /> Wishlist
+              </Link>
+              <Link
+                href="/gift-card"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Gift Cards
+              </Link>
+              <Link
+                href="/rewards"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Rewards
               </Link>
               <Link
                 href="/about"

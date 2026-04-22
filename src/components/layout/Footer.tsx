@@ -65,6 +65,16 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                   All Products
                 </Link>
               </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/gift-card">
+                  Gift Cards
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/rewards">
+                  Closet Coins
+                </Link>
+              </li>
             </ul>
           </div>
 

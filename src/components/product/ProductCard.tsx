@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatPKR } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import WishlistButton from "./WishlistButton";
 import QuickAddButton from "./QuickAddButton";
 import QuickViewButton from "./QuickViewButton";
+import CompareButton from "./CompareButton";
+import PriceDisplay from "@/components/ui/PriceDisplay";
 
 export default function ProductCard({
   product,
@@ -88,11 +89,12 @@ export default function ProductCard({
             </p>
             <h3 className="mt-1 line-clamp-1 text-sm font-medium text-ink">{product.name}</h3>
             <div className="mt-1 flex items-baseline gap-2">
-              <p className="text-sm font-semibold">{formatPKR(product.price_pkr)}</p>
+              <PriceDisplay amount={product.price_pkr} className="text-sm font-semibold" />
               {product.original_price_pkr && product.original_price_pkr > product.price_pkr && (
-                <p className="text-xs text-muted-foreground line-through">
-                  {formatPKR(product.original_price_pkr)}
-                </p>
+                <PriceDisplay
+                  amount={product.original_price_pkr}
+                  className="text-xs text-muted-foreground line-through"
+                />
               )}
             </div>
           </div>
@@ -100,8 +102,9 @@ export default function ProductCard({
       </Link>
 
       {/* Quick actions: wishlist (on image, top-right) and quick-add (inline with price row, always visible). */}
-      <div className="absolute right-2 top-2 sm:right-2.5 sm:top-2.5 sm:opacity-0 sm:transition-opacity sm:duration-300 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
+      <div className="absolute right-2 top-2 flex flex-col gap-2 sm:right-2.5 sm:top-2.5 sm:opacity-0 sm:transition-opacity sm:duration-300 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
         <WishlistButton productId={product.id} productName={product.name} />
+        <CompareButton productId={product.id} productName={product.name} />
       </div>
       <div className="pointer-events-none absolute right-0 bottom-1">
         <div className="pointer-events-auto">

@@ -7,6 +7,7 @@ import Drawer from "@/components/ui/Drawer";
 import { useCart } from "@/lib/cart-store";
 import { useUi } from "@/lib/ui-store";
 import { formatPKR } from "@/lib/format";
+import FreeShippingProgress from "./FreeShippingProgress";
 
 export default function CartDrawer() {
   const open = useUi((s) => s.cartOpen);
@@ -97,6 +98,9 @@ export default function CartDrawer() {
           </ul>
 
           <div className="border-t border-border bg-cream/50 p-5">
+            <div className="mb-3">
+              <FreeShippingProgress subtotal={subtotal} />
+            </div>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="text-base font-semibold">{formatPKR(subtotal)}</span>

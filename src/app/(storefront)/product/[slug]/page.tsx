@@ -115,7 +115,7 @@ export default async function ProductPage({ params }: { params: Params }) {
               transitionName={`product-${product.id}`}
             />
           </div>
-          <ProductDetailClient product={product} />
+          <ProductDetailClient product={product} allProducts={allProducts} />
         </div>
       </div>
 

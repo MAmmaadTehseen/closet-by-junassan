@@ -7,14 +7,26 @@ import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
+import CompareButton from "./CompareButton";
+import PriceDropAlert from "./PriceDropAlert";
+import CompleteTheLook from "./CompleteTheLook";
+import ProductFAQ from "./ProductFAQ";
+import SizeFitFinder from "./SizeFitFinder";
+import PriceDisplay from "@/components/ui/PriceDisplay";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
-import { formatPKR, seededRandom } from "@/lib/format";
+import { seededRandom } from "@/lib/format";
 import { waLink, siteConfig } from "@/lib/site-config";
 import type { Product } from "@/lib/types";
 
-export default function ProductDetailClient({ product }: { product: Product }) {
+export default function ProductDetailClient({
+  product,
+  allProducts = [],
+}: {
+  product: Product;
+  allProducts?: Product[];
+}) {
   const [selectedSize, setSelectedSize] = useState(product.size);
   const [copied, setCopied] = useState(false);
   const push = useRecent((s) => s.push);
@@ -68,12 +80,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       </div>
 
       <div className="flex items-baseline gap-3">
-        <p className="font-display text-3xl font-semibold">{formatPKR(product.price_pkr)}</p>
+        <PriceDisplay amount={product.price_pkr} className="font-display text-3xl font-semibold" />
         {product.original_price_pkr && product.original_price_pkr > product.price_pkr && (
           <>
-            <p className="text-base text-muted-foreground line-through">
-              {formatPKR(product.original_price_pkr)}
-            </p>
+            <PriceDisplay
+              amount={product.original_price_pkr}
+              className="text-base text-muted-foreground line-through"
+            />
             <span className="rounded-full bg-accent-red/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-red">
               Save {discount}%
             </span>
@@ -131,8 +144,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               </button>
             ))}
           </div>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <SizeGuideModal category={product.category} />
+            <SizeFitFinder />
           </div>
         </div>
       )}
@@ -142,10 +156,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {soldOut ? (
         <RestockNotify productName={product.name} />
       ) : (
-        <AddToCartButton product={product} selectedSize={selectedSize} />
+        <>
+          <AddToCartButton product={product} selectedSize={selectedSize} />
+          <PriceDropAlert
+            productId={product.id}
+            productName={product.name}
+            price={product.price_pkr}
+          />
+        </>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <a
           href={waLink(`Hi! Is "${product.name}" still available? ${product.size ? `(Size ${product.size})` : ""}`)}
           target="_blank"
@@ -154,6 +175,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         >
           <MessageCircle className="h-3.5 w-3.5" /> Ask on WhatsApp
         </a>
+        <CompareButton productId={product.id} productName={product.name} variant="pill" />
         <button
           onClick={onCopy}
           className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 py-3 text-xs font-semibold uppercase tracking-widest text-ink transition hover:border-ink"
@@ -219,6 +241,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           },
         ]}
       />
+
+      {allProducts.length > 0 && (
+        <CompleteTheLook product={product} allProducts={allProducts} />
+      )}
+      <ProductFAQ />
     </div>
   );
 }

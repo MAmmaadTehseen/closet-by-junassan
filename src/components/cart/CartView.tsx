@@ -9,6 +9,8 @@ import { useWishlist } from "@/lib/wishlist-store";
 import { toast } from "@/components/ui/Toaster";
 import { applyCoupon, type Coupon } from "@/lib/coupons";
 import { formatPKR } from "@/lib/format";
+import FreeShippingProgress from "./FreeShippingProgress";
+import CoinsWidget from "@/components/rewards/CoinsWidget";
 
 export default function CartView() {
   const items = useCart((s) => s.items);
@@ -135,6 +137,15 @@ export default function CartView() {
 
       <aside className="h-fit space-y-5 rounded-2xl border border-border bg-cream/40 p-6 lg:sticky lg:top-28">
         <h2 className="font-display text-xl font-semibold">Order Summary</h2>
+
+        <FreeShippingProgress subtotal={subtotal} />
+
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-paper px-4 py-3 text-xs">
+          <span className="text-muted-foreground">
+            You&apos;ll earn <span className="font-semibold text-ink">{Math.floor(subtotal / 100)} coins</span> on this order.
+          </span>
+          <CoinsWidget compact />
+        </div>
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
