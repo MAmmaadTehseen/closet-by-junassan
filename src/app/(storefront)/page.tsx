@@ -8,6 +8,11 @@ import HowCodWorks from "@/components/home/HowCodWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
 import StoriesBar from "@/components/home/StoriesBar";
+import TrustBadgesStrip from "@/components/home/TrustBadgesStrip";
+import BrandsCarousel from "@/components/home/BrandsCarousel";
+import ShopTheLook from "@/components/home/ShopTheLook";
+import StyleQuiz from "@/components/home/StyleQuiz";
+import LoyaltyReferralCard from "@/components/home/LoyaltyReferralCard";
 import { fetchProducts } from "@/lib/products";
 import { fetchCategories } from "@/lib/categories";
 import { fetchActiveDrops } from "@/lib/drops";
@@ -33,6 +38,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
+      <TrustBadgesStrip />
       <StoriesBar drops={drops} />
       <InstagramMosaic products={newArrivals} />
       <CategoryGrid categories={categories} counts={categoryCounts} />
@@ -43,12 +49,15 @@ export default async function HomePage() {
         href="/deals"
       />
       <EditorNote />
+      <ShopTheLook products={trending.length >= 4 ? trending : all} />
       <ProductRail
         eyebrow="04 · Trending Now"
         title="Everyone's reaching for these."
         products={trending}
         href="/shop"
       />
+      <BrandsCarousel products={all} />
+      <StyleQuiz />
       <ProductRail
         eyebrow="05 · Act fast"
         title="Limited Stock"
@@ -56,6 +65,7 @@ export default async function HomePage() {
         href="/shop"
       />
       <HowCodWorks />
+      <LoyaltyReferralCard />
       <CodBanner />
       <Testimonials />
       <Newsletter />

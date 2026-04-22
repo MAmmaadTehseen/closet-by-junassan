@@ -6,7 +6,10 @@ import AddToCartButton from "./AddToCartButton";
 import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
+import CompareButton from "./CompareButton";
 import SizeGuideModal from "./SizeGuideModal";
+import DeliveryEstimator from "./DeliveryEstimator";
+import OrderConfidenceCard from "./OrderConfidenceCard";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
@@ -145,7 +148,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <AddToCartButton product={product} selectedSize={selectedSize} />
       )}
 
-      <div className="flex items-center gap-2">
+      {!soldOut && <DeliveryEstimator />}
+
+      <OrderConfidenceCard />
+
+      <div className="flex flex-wrap items-center gap-2">
+        <CompareButton productId={product.id} productName={product.name} variant="pill" />
         <a
           href={waLink(`Hi! Is "${product.name}" still available? ${product.size ? `(Size ${product.size})` : ""}`)}
           target="_blank"

@@ -18,6 +18,7 @@ export default async function StorefrontLayout({
       <Header categories={categories} />
       <main className="flex-1">{children}</main>
       <Footer categories={categories} />
+      <div aria-hidden className="h-16 shrink-0 lg:hidden" />
       <ClientShell products={products} />
     </>
   );
