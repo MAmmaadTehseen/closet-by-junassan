@@ -93,6 +93,18 @@ export async function fetchRelated(product: Product, limit = 4): Promise<Product
   return all.filter((p) => p.slug !== product.slug).slice(0, limit);
 }
 
+/**
+ * "Restocked" = items still in meaningful supply, sorted newest-first. For a
+ * thrift-store catalog we proxy this with stock ≥ 2 (not about to vanish).
+ */
+export async function fetchRestocked(limit = 8): Promise<Product[]> {
+  const all = await fetchProducts();
+  return all
+    .filter((p) => p.stock >= 2)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, limit);
+}
+
 export async function fetchAllSlugs(): Promise<string[]> {
   const all = await fetchProducts();
   return all.map((p) => p.slug);

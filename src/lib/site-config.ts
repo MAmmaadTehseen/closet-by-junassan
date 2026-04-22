@@ -37,6 +37,11 @@ export const siteConfig = {
     "3-day easy returns",
     "Pay when it arrives",
   ],
+
+  perks: {
+    freeGiftThreshold: 4000,
+    freeGiftLabel: "a free mystery accessory",
+  },
 } as const;
 
 export const waLink = (msg = "Hi! I'd like to ask about a product."): string =>

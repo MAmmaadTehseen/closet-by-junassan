@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2, Heart, Tag, X, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, Bookmark, Tag, X, ShoppingBag, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart-store";
-import { useWishlist } from "@/lib/wishlist-store";
+import { useSaved } from "@/lib/saved-store";
 import { toast } from "@/components/ui/Toaster";
 import { applyCoupon, type Coupon } from "@/lib/coupons";
 import { formatPKR } from "@/lib/format";
@@ -14,7 +14,10 @@ export default function CartView() {
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
-  const toggleWish = useWishlist((s) => s.toggle);
+  const addToCart = useCart((s) => s.add);
+  const savedItems = useSaved((s) => s.items);
+  const saveForLater = useSaved((s) => s.save);
+  const removeSaved = useSaved((s) => s.remove);
   const [mounted, setMounted] = useState(false);
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [couponInput, setCouponInput] = useState("");
@@ -59,6 +62,7 @@ export default function CartView() {
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
+      <div>
       <ul className="flex flex-col divide-y divide-border border-y border-border">
         {items.map((item) => (
           <li key={item.id} className="flex gap-4 py-6">
@@ -112,13 +116,13 @@ export default function CartView() {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <button
                     onClick={() => {
-                      toggleWish(item.id);
+                      saveForLater(item);
                       remove(item.id);
-                      toast.success("Moved to wishlist");
+                      toast.success("Saved for later");
                     }}
                     className="inline-flex items-center gap-1.5 hover:text-ink"
                   >
-                    <Heart className="h-3.5 w-3.5" /> Save
+                    <Bookmark className="h-3.5 w-3.5" /> Save for later
                   </button>
                   <button
                     onClick={() => remove(item.id)}
@@ -132,6 +136,74 @@ export default function CartView() {
           </li>
         ))}
       </ul>
+
+      {savedItems.length > 0 && (
+        <section className="mt-10">
+          <div className="mb-4 flex items-baseline justify-between">
+            <div>
+              <p className="eyebrow">Saved for later</p>
+              <h3 className="mt-1 font-display text-xl font-semibold">
+                {savedItems.length} {savedItems.length === 1 ? "piece" : "pieces"} parked
+              </h3>
+            </div>
+          </div>
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {savedItems.map((s) => (
+              <li
+                key={s.id}
+                className="flex gap-3 rounded-2xl border border-border bg-paper p-3"
+              >
+                <Link
+                  href={`/product/${s.slug}`}
+                  className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-cream"
+                >
+                  {s.image && (
+                    <Image
+                      src={s.image}
+                      alt={s.name}
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
+                  )}
+                </Link>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <Link
+                    href={`/product/${s.slug}`}
+                    className="line-clamp-1 text-sm font-medium hover:underline"
+                  >
+                    {s.name}
+                  </Link>
+                  <p className="mt-0.5 text-[11px] uppercase tracking-widest text-muted-foreground">
+                    Size {s.size}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold">{formatPKR(s.price_pkr)}</p>
+                  <div className="mt-auto flex items-center justify-between pt-2 text-xs">
+                    <button
+                      onClick={() => {
+                        addToCart({ ...s, quantity: 1 });
+                        removeSaved(s.id);
+                        toast.success("Back in your bag");
+                      }}
+                      className="inline-flex items-center gap-1 font-semibold text-ink hover:underline"
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" /> Move to bag
+                    </button>
+                    <button
+                      onClick={() => removeSaved(s.id)}
+                      className="text-muted-foreground hover:text-accent-red"
+                      aria-label="Remove saved"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      </div>
 
       <aside className="h-fit space-y-5 rounded-2xl border border-border bg-cream/40 p-6 lg:sticky lg:top-28">
         <h2 className="font-display text-xl font-semibold">Order Summary</h2>
@@ -163,19 +235,25 @@ export default function CartView() {
         </div>
 
         {!coupon && (
-          <div className="flex items-center gap-2 rounded-full border border-border bg-paper p-1">
-            <input
-              value={couponInput}
-              onChange={(e) => setCouponInput(e.target.value)}
-              placeholder="Coupon code"
-              className="flex-1 bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none"
-            />
-            <button
-              onClick={tryCoupon}
-              className="rounded-full bg-ink px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-paper"
-            >
-              Apply
-            </button>
+          <div>
+            <div className="flex items-center gap-2 rounded-full border border-border bg-paper p-1">
+              <input
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value)}
+                placeholder="Coupon or gift card"
+                className="flex-1 bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none"
+              />
+              <button
+                onClick={tryCoupon}
+                className="rounded-full bg-ink px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-paper"
+              >
+                Apply
+              </button>
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              Gift cards look like{" "}
+              <span className="font-mono text-ink">GIFT-0500</span>
+            </p>
           </div>
         )}
 

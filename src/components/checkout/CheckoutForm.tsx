@@ -12,6 +12,7 @@ import { PHONE_RE, normalizePhone } from "@/lib/validators";
 import { siteConfig } from "@/lib/site-config";
 import { getDeliveryWindow } from "@/lib/delivery";
 import { toast } from "@/components/ui/Toaster";
+import MobileOrderPeek from "./MobileOrderPeek";
 
 const STORAGE_KEY = "closet-checkout-draft";
 
@@ -121,6 +122,7 @@ export default function CheckoutForm() {
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
       <div>
+        <MobileOrderPeek />
         <Stepper step={step} />
 
         {step === 1 && (

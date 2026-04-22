@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import WishlistView from "@/components/product/WishlistView";
+import PriceDropList from "@/components/product/PriceDropList";
 import { fetchProducts } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default async function WishlistPage() {
       <div className="mt-10">
         <WishlistView allProducts={products} />
       </div>
+      <PriceDropList allProducts={products} />
     </div>
   );
 }

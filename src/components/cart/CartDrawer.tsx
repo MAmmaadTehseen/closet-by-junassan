@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Gift } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
 import { useCart } from "@/lib/cart-store";
 import { useUi } from "@/lib/ui-store";
 import { formatPKR } from "@/lib/format";
+import { siteConfig } from "@/lib/site-config";
 
 export default function CartDrawer() {
   const open = useUi((s) => s.cartOpen);
@@ -97,6 +98,7 @@ export default function CartDrawer() {
           </ul>
 
           <div className="border-t border-border bg-cream/50 p-5">
+            <FreeGiftProgress subtotal={subtotal} />
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="text-base font-semibold">{formatPKR(subtotal)}</span>
@@ -127,5 +129,33 @@ export default function CartDrawer() {
         </div>
       )}
     </Drawer>
+  );
+}
+
+function FreeGiftProgress({ subtotal }: { subtotal: number }) {
+  const target = siteConfig.perks.freeGiftThreshold;
+  const pct = Math.min(100, Math.round((subtotal / target) * 100));
+  const unlocked = subtotal >= target;
+  const remaining = Math.max(0, target - subtotal);
+
+  return (
+    <div className="mb-4 rounded-xl border border-border bg-paper p-3">
+      <div className="flex items-center gap-2 text-xs">
+        <Gift className={`h-3.5 w-3.5 ${unlocked ? "text-green-600" : "text-ink"}`} />
+        <span className="flex-1 font-medium text-ink">
+          {unlocked
+            ? `You unlocked ${siteConfig.perks.freeGiftLabel}!`
+            : `Add ${formatPKR(remaining)} more for ${siteConfig.perks.freeGiftLabel}`}
+        </span>
+      </div>
+      <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-cream">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${
+            unlocked ? "bg-green-600" : "bg-ink"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
   );
 }

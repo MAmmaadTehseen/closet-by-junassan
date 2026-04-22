@@ -7,10 +7,14 @@ import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
+import DeliveryCountdown from "./DeliveryCountdown";
+import PriceDropToggle from "./PriceDropToggle";
+import CompareToggle from "@/components/compare/CompareToggle";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
 import { formatPKR, seededRandom } from "@/lib/format";
+import { pkrToUrduWords } from "@/lib/urdu-number";
 import { waLink, siteConfig } from "@/lib/site-config";
 import type { Product } from "@/lib/types";
 
@@ -67,18 +71,28 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <WishlistButton productId={product.id} productName={product.name} className="h-11 w-11" />
       </div>
 
-      <div className="flex items-baseline gap-3">
-        <p className="font-display text-3xl font-semibold">{formatPKR(product.price_pkr)}</p>
-        {product.original_price_pkr && product.original_price_pkr > product.price_pkr && (
-          <>
-            <p className="text-base text-muted-foreground line-through">
-              {formatPKR(product.original_price_pkr)}
-            </p>
-            <span className="rounded-full bg-accent-red/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-red">
-              Save {discount}%
-            </span>
-          </>
-        )}
+      <div>
+        <div className="flex items-baseline gap-3">
+          <p className="font-display text-3xl font-semibold">{formatPKR(product.price_pkr)}</p>
+          {product.original_price_pkr && product.original_price_pkr > product.price_pkr && (
+            <>
+              <p className="text-base text-muted-foreground line-through">
+                {formatPKR(product.original_price_pkr)}
+              </p>
+              <span className="rounded-full bg-accent-red/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-red">
+                Save {discount}%
+              </span>
+            </>
+          )}
+        </div>
+        <p
+          dir="rtl"
+          lang="ur"
+          className="mt-1 text-xs text-muted-foreground"
+          title="Urdu transliteration of the price"
+        >
+          {pkrToUrduWords(product.price_pkr)}
+        </p>
       </div>
 
       {!soldOut && product.stock <= 3 && (
@@ -142,8 +156,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {soldOut ? (
         <RestockNotify productName={product.name} />
       ) : (
-        <AddToCartButton product={product} selectedSize={selectedSize} />
+        <>
+          <AddToCartButton product={product} selectedSize={selectedSize} />
+          <DeliveryCountdown />
+        </>
       )}
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <CompareToggle product={product} />
+        <PriceDropToggle product={product} />
+      </div>
 
       <div className="flex items-center gap-2">
         <a
