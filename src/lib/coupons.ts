@@ -1,3 +1,5 @@
+import { REFERRAL_DISCOUNT_PKR } from "./referral";
+
 export interface Coupon {
   code: string;
   label: string;
@@ -17,11 +19,25 @@ const COUPONS: Record<string, Coupon> = {
   },
 };
 
+/** FRIEND-XXXXX referral codes unlock a flat Rs 300 discount. */
+function resolveCoupon(code: string): Coupon | null {
+  const c = code.trim().toUpperCase();
+  if (COUPONS[c]) return COUPONS[c];
+  if (/^FRIEND-[A-Z0-9]{3,}$/.test(c)) {
+    return {
+      code: c,
+      label: `Rs ${REFERRAL_DISCOUNT_PKR} off (referral)`,
+      apply: (s) => Math.max(0, s - REFERRAL_DISCOUNT_PKR),
+    };
+  }
+  return null;
+}
+
 export function applyCoupon(
   code: string,
   subtotal: number,
 ): { ok: true; coupon: Coupon; newSubtotal: number } | { ok: false; error: string } {
-  const c = COUPONS[code.trim().toUpperCase()];
+  const c = resolveCoupon(code);
   if (!c) return { ok: false, error: "Invalid coupon code." };
   const newSubtotal = c.apply(subtotal);
   return { ok: true, coupon: c, newSubtotal };

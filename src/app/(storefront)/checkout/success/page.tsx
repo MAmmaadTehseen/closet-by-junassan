@@ -4,6 +4,7 @@ import { Phone, Package, Truck, MessageCircle, MapPin } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/brand-icons";
 import ClearCartOnSuccess from "@/components/checkout/ClearCartOnSuccess";
 import CopyCode from "@/components/checkout/CopyCode";
+import ReferralCard from "@/components/checkout/ReferralCard";
 import { siteConfig, waLink } from "@/lib/site-config";
 import { getDeliveryWindow } from "@/lib/delivery";
 
@@ -82,6 +83,12 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
         <div className="mt-6 flex flex-col items-center gap-1.5">
           <CopyCode code={code} />
           <p className="text-[11px] text-muted-foreground">Tap to copy your order code</p>
+        </div>
+      )}
+
+      {code && (
+        <div className="mt-8">
+          <ReferralCard orderCode={code} />
         </div>
       )}
 

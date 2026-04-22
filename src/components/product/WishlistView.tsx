@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Heart } from "lucide-react";
 import ProductCard from "./ProductCard";
+import WishlistShare from "./WishlistShare";
 import { useWishlist } from "@/lib/wishlist-store";
 import type { Product } from "@/lib/types";
 
@@ -43,16 +44,19 @@ export default function WishlistView({ allProducts }: { allProducts: Product[] }
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
           {items.length} saved
         </p>
-        <button
-          onClick={clear}
-          className="text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-accent-red"
-        >
-          Clear all
-        </button>
+        <div className="flex items-center gap-3">
+          <WishlistShare />
+          <button
+            onClick={clear}
+            className="text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-accent-red"
+          >
+            Clear all
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (

@@ -65,6 +65,21 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                   All Products
                 </Link>
               </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/brands">
+                  Brands A–Z
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/lookbook">
+                  Lookbook
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/compare">
+                  Compare
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -76,6 +91,8 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
               <li><Link className="text-ink/80 hover:text-ink" href="/contact#faq">FAQ</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/contact">Returns & Sizing</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/track">Track Order</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/recently-viewed">Recently viewed</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/creators">Creators</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/privacy">Privacy Policy</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/terms">Terms</Link></li>
             </ul>

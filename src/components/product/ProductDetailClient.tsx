@@ -7,6 +7,9 @@ import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
+import SizeRecommender from "./SizeRecommender";
+import ShippingEstimator from "./ShippingEstimator";
+import CompareButton from "./CompareButton";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
@@ -131,11 +134,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               </button>
             ))}
           </div>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-4">
             <SizeGuideModal category={product.category} />
+            <SizeRecommender />
           </div>
         </div>
       )}
+
+      <ShippingEstimator />
+
 
       <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
 
@@ -174,6 +181,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         >
           <Share2 className="h-3.5 w-3.5" />
         </button>
+      </div>
+
+      <div className="flex items-center justify-center">
+        <CompareButton productId={product.id} />
       </div>
 
       <StickyBuyBar product={product} selectedSize={selectedSize} />

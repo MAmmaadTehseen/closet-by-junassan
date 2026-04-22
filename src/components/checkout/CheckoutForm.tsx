@@ -12,6 +12,12 @@ import { PHONE_RE, normalizePhone } from "@/lib/validators";
 import { siteConfig } from "@/lib/site-config";
 import { getDeliveryWindow } from "@/lib/delivery";
 import { toast } from "@/components/ui/Toaster";
+import GiftOptions, {
+  GIFT_WRAP_FEE_PKR,
+  type GiftState,
+} from "./GiftOptions";
+import BulkDiscountMeter from "@/components/cart/BulkDiscountMeter";
+import { calcBulkDiscount } from "@/lib/bulk-discount";
 
 const STORAGE_KEY = "closet-checkout-draft";
 
@@ -32,6 +38,7 @@ export default function CheckoutForm() {
   const [pending, startTransition] = useTransition();
   const [step, setStep] = useState<1 | 2>(1);
   const [draft, setDraft] = useState<Draft>(EMPTY);
+  const [gift, setGift] = useState<GiftState>({ wrap: false, message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const idempotencyKey = useRef<string>("");
 
@@ -57,6 +64,13 @@ export default function CheckoutForm() {
     () => items.reduce((sum, i) => sum + i.price_pkr * i.quantity, 0),
     [items],
   );
+  const totalQty = useMemo(
+    () => items.reduce((n, i) => n + i.quantity, 0),
+    [items],
+  );
+  const bulk = useMemo(() => calcBulkDiscount(totalQty, subtotal), [totalQty, subtotal]);
+  const giftFee = gift.wrap ? GIFT_WRAP_FEE_PKR : 0;
+  const grandTotal = bulk.subtotalAfter + giftFee;
 
   if (!mounted) return null;
 
@@ -98,13 +112,26 @@ export default function CheckoutForm() {
       "website",
     ) as HTMLInputElement | null;
 
+    const extras: string[] = [];
+    if (gift.wrap) {
+      extras.push(
+        `GIFT WRAP (+Rs ${GIFT_WRAP_FEE_PKR})${
+          gift.message ? ` · message: "${gift.message}"` : ""
+        }`,
+      );
+    }
+    if (bulk.tier) {
+      extras.push(`BULK ${bulk.tier.percent}% off (−Rs ${bulk.discount})`);
+    }
+    const mergedNotes = [draft.notes, ...extras].filter(Boolean).join(" | ");
+
     startTransition(async () => {
       const result = await createOrder({
         full_name: draft.full_name,
         phone: normalizePhone(draft.phone),
         city: draft.city,
         address: draft.address,
-        notes: draft.notes || undefined,
+        notes: mergedNotes || undefined,
         email: draft.email?.trim() || undefined,
         items,
         honeypot: honeypot?.value ?? "",
@@ -190,6 +217,8 @@ export default function CheckoutForm() {
               textarea
             />
 
+            <GiftOptions value={gift} onChange={setGift} />
+
             <div className="rounded-2xl border border-ink bg-paper p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-paper">
@@ -266,7 +295,7 @@ export default function CheckoutForm() {
                 disabled={pending}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-ink py-4 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90 disabled:opacity-60"
               >
-                {pending ? "Placing order…" : `Place Order — ${formatPKR(subtotal)}`}
+                {pending ? "Placing order…" : `Place Order — ${formatPKR(grandTotal)}`}
               </button>
             </div>
           </form>
@@ -293,10 +322,31 @@ export default function CheckoutForm() {
             </li>
           ))}
         </ul>
-        <div className="flex justify-between border-t border-border pt-4 text-base font-semibold">
-          <span>Total</span>
-          <span>{formatPKR(subtotal)}</span>
+        <div className="border-t border-border pt-4 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span>{formatPKR(subtotal)}</span>
+          </div>
+          {bulk.tier && (
+            <div className="mt-1 flex justify-between">
+              <span className="text-muted-foreground">
+                Bulk {bulk.tier.percent}% off
+              </span>
+              <span>−{formatPKR(bulk.discount)}</span>
+            </div>
+          )}
+          {gift.wrap && (
+            <div className="mt-1 flex justify-between">
+              <span className="text-muted-foreground">Gift wrap</span>
+              <span>+{formatPKR(GIFT_WRAP_FEE_PKR)}</span>
+            </div>
+          )}
+          <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-semibold">
+            <span>Total</span>
+            <span>{formatPKR(grandTotal)}</span>
+          </div>
         </div>
+        <BulkDiscountMeter compact />
         <p className="text-center text-[11px] uppercase tracking-widest text-muted-foreground">
           Flat delivery · {siteConfig.shipping.deliveryDays}
         </p>

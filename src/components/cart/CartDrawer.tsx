@@ -7,6 +7,8 @@ import Drawer from "@/components/ui/Drawer";
 import { useCart } from "@/lib/cart-store";
 import { useUi } from "@/lib/ui-store";
 import { formatPKR } from "@/lib/format";
+import BulkDiscountMeter from "./BulkDiscountMeter";
+import { calcBulkDiscount } from "@/lib/bulk-discount";
 
 export default function CartDrawer() {
   const open = useUi((s) => s.cartOpen);
@@ -15,6 +17,8 @@ export default function CartDrawer() {
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const subtotal = items.reduce((n, i) => n + i.price_pkr * i.quantity, 0);
+  const totalQty = items.reduce((n, i) => n + i.quantity, 0);
+  const bulk = calcBulkDiscount(totalQty, subtotal);
 
   return (
     <Drawer open={open} onClose={close} title="Your Bag">
@@ -97,9 +101,22 @@ export default function CartDrawer() {
           </ul>
 
           <div className="border-t border-border bg-cream/50 p-5">
-            <div className="mb-3 flex items-center justify-between text-sm">
+            <div className="mb-3">
+              <BulkDiscountMeter compact />
+            </div>
+            <div className="mb-1 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="text-base font-semibold">{formatPKR(subtotal)}</span>
+              <span className="font-semibold">{formatPKR(subtotal)}</span>
+            </div>
+            {bulk.tier && (
+              <div className="mb-1 flex items-center justify-between text-sm text-ink">
+                <span>Bulk discount ({bulk.tier.percent}%)</span>
+                <span>−{formatPKR(bulk.discount)}</span>
+              </div>
+            )}
+            <div className="mb-3 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Total</span>
+              <span className="text-base font-semibold">{formatPKR(bulk.subtotalAfter)}</span>
             </div>
             <p className="mb-4 flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-green-600" /> Flat delivery across Pakistan

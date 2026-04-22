@@ -6,6 +6,7 @@ import ProductGrid from "@/components/product/ProductGrid";
 import RecentlyViewed from "@/components/product/RecentlyViewed";
 import Breadcrumbs from "@/components/product/Breadcrumbs";
 import Reviews from "@/components/product/Reviews";
+import CompleteTheLook from "@/components/product/CompleteTheLook";
 import { fetchProductBySlug, fetchRelated, fetchProducts } from "@/lib/products";
 import { fetchApprovedReviews } from "@/lib/reviews";
 import { siteConfig } from "@/lib/site-config";
@@ -118,6 +119,8 @@ export default async function ProductPage({ params }: { params: Params }) {
           <ProductDetailClient product={product} />
         </div>
       </div>
+
+      <CompleteTheLook anchor={product} pool={allProducts} />
 
       {reviews.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">

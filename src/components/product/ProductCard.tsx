@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatPKR } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import WishlistButton from "./WishlistButton";
 import QuickAddButton from "./QuickAddButton";
 import QuickViewButton from "./QuickViewButton";
+import CompareButton from "./CompareButton";
+import Price from "@/components/ui/Price";
 
 export default function ProductCard({
   product,
@@ -75,8 +76,11 @@ export default function ProductCard({
 
           {/* Quick view — bottom-left, shows on hover (desktop) */}
           {!onlyOne && (
-            <div className="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5">
+            <div className="absolute bottom-2 left-2 flex flex-col gap-1.5 sm:bottom-2.5 sm:left-2.5">
               <QuickViewButton product={product} />
+              <div className="hidden sm:block opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
+                <CompareButton productId={product.id} />
+              </div>
             </div>
           )}
         </div>
@@ -88,11 +92,12 @@ export default function ProductCard({
             </p>
             <h3 className="mt-1 line-clamp-1 text-sm font-medium text-ink">{product.name}</h3>
             <div className="mt-1 flex items-baseline gap-2">
-              <p className="text-sm font-semibold">{formatPKR(product.price_pkr)}</p>
+              <Price amount={product.price_pkr} className="text-sm font-semibold" />
               {product.original_price_pkr && product.original_price_pkr > product.price_pkr && (
-                <p className="text-xs text-muted-foreground line-through">
-                  {formatPKR(product.original_price_pkr)}
-                </p>
+                <Price
+                  amount={product.original_price_pkr}
+                  className="text-xs text-muted-foreground line-through"
+                />
               )}
             </div>
           </div>
