@@ -8,7 +8,7 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
   return (
     <footer className="mt-20 border-t border-border bg-cream/50">
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-8 sm:px-6">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div>
             <h3 className="font-display text-2xl font-semibold">{siteConfig.name}</h3>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -65,6 +65,26 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                   All Products
                 </Link>
               </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/style-quiz">
+                  Style Quiz
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/compare">
+                  Compare Pieces
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="eyebrow">Rewards</p>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              <li><Link className="text-ink/80 hover:text-ink" href="/rewards">Closet Coins</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/refer">Refer & Earn</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/gift-cards">Gift Cards</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/wishlist">Wishlist</Link></li>
             </ul>
           </div>
 

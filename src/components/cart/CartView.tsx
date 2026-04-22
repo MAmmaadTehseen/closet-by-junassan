@@ -2,48 +2,59 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2, Heart, Tag, X, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, Heart, Tag, X, ShoppingBag, Bookmark } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { toast } from "@/components/ui/Toaster";
 import { applyCoupon, type Coupon } from "@/lib/coupons";
 import { formatPKR } from "@/lib/format";
+import FreeShippingBar from "@/components/cart/FreeShippingBar";
+import CoinRedeem from "@/components/cart/CoinRedeem";
+import SavedForLater from "@/components/cart/SavedForLater";
+import { useCoins } from "@/lib/coins-store";
+import { useSaved } from "@/lib/saved-store";
 
 export default function CartView() {
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const toggleWish = useWishlist((s) => s.toggle);
+  const saveForLater = useSaved((s) => s.save);
   const [mounted, setMounted] = useState(false);
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [couponInput, setCouponInput] = useState("");
+  const [coinsApplied, setCoinsApplied] = useState(0);
+  const balance = useCoins((s) => s.balance);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
   const subtotal = items.reduce((sum, i) => sum + i.price_pkr * i.quantity, 0);
-  const total = coupon ? coupon.apply(subtotal) : subtotal;
-  const discount = subtotal - total;
+  const afterCoupon = coupon ? coupon.apply(subtotal) : subtotal;
+  const couponDiscount = subtotal - afterCoupon;
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-5 py-24 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cream">
-          <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+      <>
+        <div className="flex flex-col items-center gap-5 py-24 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cream">
+            <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h2 className="font-display text-2xl font-semibold">Your closet is empty</h2>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Browse our latest drops and limited pieces — every item is hand-picked and ships COD.
+          </p>
+          <Link
+            href="/shop"
+            className="mt-2 rounded-full bg-ink px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper"
+          >
+            Shop the Drop
+          </Link>
         </div>
-        <h2 className="font-display text-2xl font-semibold">Your closet is empty</h2>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Browse our latest drops and limited pieces — every item is hand-picked and ships COD.
-        </p>
-        <Link
-          href="/shop"
-          className="mt-2 rounded-full bg-ink px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper"
-        >
-          Shop the Drop
-        </Link>
-      </div>
+        <SavedForLater />
+      </>
     );
   }
 
@@ -58,6 +69,7 @@ export default function CartView() {
   };
 
   return (
+    <>
     <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
       <ul className="flex flex-col divide-y divide-border border-y border-border">
         {items.map((item) => (
@@ -112,13 +124,23 @@ export default function CartView() {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <button
                     onClick={() => {
+                      saveForLater(item);
+                      remove(item.id);
+                      toast.success("Saved for later");
+                    }}
+                    className="inline-flex items-center gap-1.5 hover:text-ink"
+                  >
+                    <Bookmark className="h-3.5 w-3.5" /> Save for later
+                  </button>
+                  <button
+                    onClick={() => {
                       toggleWish(item.id);
                       remove(item.id);
                       toast.success("Moved to wishlist");
                     }}
                     className="inline-flex items-center gap-1.5 hover:text-ink"
                   >
-                    <Heart className="h-3.5 w-3.5" /> Save
+                    <Heart className="h-3.5 w-3.5" /> Wishlist
                   </button>
                   <button
                     onClick={() => remove(item.id)}
@@ -135,6 +157,8 @@ export default function CartView() {
 
       <aside className="h-fit space-y-5 rounded-2xl border border-border bg-cream/40 p-6 lg:sticky lg:top-28">
         <h2 className="font-display text-xl font-semibold">Order Summary</h2>
+
+        <FreeShippingBar subtotal={subtotal} />
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -157,7 +181,13 @@ export default function CartView() {
                   <X className="h-3 w-3" />
                 </button>
               </span>
-              <span className="font-medium text-accent-red">− {formatPKR(discount)}</span>
+              <span className="font-medium text-accent-red">− {formatPKR(couponDiscount)}</span>
+            </div>
+          )}
+          {coinsApplied > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Closet Coins</span>
+              <span className="font-medium text-accent-red">− {formatPKR(coinsApplied)}</span>
             </div>
           )}
         </div>
@@ -179,9 +209,17 @@ export default function CartView() {
           </div>
         )}
 
+        {balance > 0 && (
+          <CoinRedeem
+            subtotal={Math.max(0, afterCoupon)}
+            applied={coinsApplied}
+            onApply={setCoinsApplied}
+          />
+        )}
+
         <div className="flex justify-between border-t border-border pt-4 text-base font-semibold">
           <span>Total</span>
-          <span>{formatPKR(total)}</span>
+          <span>{formatPKR(Math.max(0, afterCoupon - coinsApplied))}</span>
         </div>
 
         <Link
@@ -195,5 +233,7 @@ export default function CartView() {
         </p>
       </aside>
     </div>
+    <SavedForLater />
+    </>
   );
 }

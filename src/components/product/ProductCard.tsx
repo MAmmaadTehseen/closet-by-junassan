@@ -5,6 +5,7 @@ import type { Product } from "@/lib/types";
 import WishlistButton from "./WishlistButton";
 import QuickAddButton from "./QuickAddButton";
 import QuickViewButton from "./QuickViewButton";
+import CompareButton from "./CompareButton";
 
 export default function ProductCard({
   product,
@@ -100,8 +101,9 @@ export default function ProductCard({
       </Link>
 
       {/* Quick actions: wishlist (on image, top-right) and quick-add (inline with price row, always visible). */}
-      <div className="absolute right-2 top-2 sm:right-2.5 sm:top-2.5 sm:opacity-0 sm:transition-opacity sm:duration-300 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
+      <div className="absolute right-2 top-2 flex flex-col gap-2 sm:right-2.5 sm:top-2.5 sm:opacity-0 sm:transition-opacity sm:duration-300 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
         <WishlistButton productId={product.id} productName={product.name} />
+        <CompareButton productId={product.id} productName={product.name} />
       </div>
       <div className="pointer-events-none absolute right-0 bottom-1">
         <div className="pointer-events-auto">

@@ -16,6 +16,15 @@ const SocialProof = dynamic(() => import("@/components/ui/SocialProof"), {
 const ExitIntent = dynamic(() => import("@/components/ui/ExitIntent"), {
   ssr: false,
 });
+const CompareTray = dynamic(() => import("@/components/product/CompareTray"), {
+  ssr: false,
+});
+const SpinWheel = dynamic(() => import("@/components/ui/SpinWheel"), {
+  ssr: false,
+});
+const WhatsAppFab = dynamic(() => import("@/components/ui/WhatsAppFab"), {
+  ssr: false,
+});
 
 export default function ClientShell({ products }: { products: Product[] }) {
   return (
@@ -27,6 +36,9 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <BackToTop />
       <SocialProof />
       <ExitIntent />
+      <CompareTray products={products} />
+      <SpinWheel />
+      <WhatsAppFab />
     </>
   );
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
+import FreeShippingBar from "@/components/cart/FreeShippingBar";
 import { useCart } from "@/lib/cart-store";
 import { useUi } from "@/lib/ui-store";
 import { formatPKR } from "@/lib/format";
@@ -97,6 +98,9 @@ export default function CartDrawer() {
           </ul>
 
           <div className="border-t border-border bg-cream/50 p-5">
+            <div className="mb-3">
+              <FreeShippingBar subtotal={subtotal} />
+            </div>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="text-base font-semibold">{formatPKR(subtotal)}</span>

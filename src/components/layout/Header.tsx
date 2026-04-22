@@ -11,6 +11,7 @@ import { siteConfig } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import CurrencySwitch from "@/components/ui/CurrencySwitch";
 import type { CategoryDef } from "@/lib/categories";
 
 export default function Header({ categories = [] }: { categories?: CategoryDef[] }) {
@@ -18,6 +19,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
     { href: "/shop", label: "Shop" },
     ...categories.map((c) => ({ href: `/category/${c.slug}`, label: c.label })),
     { href: "/deals", label: "Deals" },
+    { href: "/style-quiz", label: "Style Quiz" },
   ];
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -90,6 +92,9 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
             >
               <Search className="h-5 w-5" />
             </button>
+            <div className="hidden sm:block">
+              <CurrencySwitch />
+            </div>
             <ThemeToggle />
             <Link
               href="/wishlist"
@@ -167,6 +172,34 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
                 className="flex items-center gap-2 border-b border-border py-4 text-base font-medium"
               >
                 <Heart className="h-4 w-4" /> Wishlist
+              </Link>
+              <Link
+                href="/compare"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Compare
+              </Link>
+              <Link
+                href="/rewards"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Closet Coins
+              </Link>
+              <Link
+                href="/refer"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Refer & Earn
+              </Link>
+              <Link
+                href="/gift-cards"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Gift Cards
               </Link>
               <Link
                 href="/about"
