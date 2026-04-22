@@ -16,6 +16,9 @@ const SocialProof = dynamic(() => import("@/components/ui/SocialProof"), {
 const ExitIntent = dynamic(() => import("@/components/ui/ExitIntent"), {
   ssr: false,
 });
+const FloatingWhatsApp = dynamic(() => import("@/components/ui/FloatingWhatsApp"), {
+  ssr: false,
+});
 
 export default function ClientShell({ products }: { products: Product[] }) {
   return (
@@ -25,6 +28,7 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <SearchPalette products={products} />
       <RegisterSW />
       <BackToTop />
+      <FloatingWhatsApp />
       <SocialProof />
       <ExitIntent />
     </>

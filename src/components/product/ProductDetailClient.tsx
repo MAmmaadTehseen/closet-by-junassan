@@ -7,6 +7,7 @@ import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
+import DeliveryEstimate from "./DeliveryEstimate";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
@@ -31,6 +32,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       ? Math.round(
           ((product.original_price_pkr - product.price_pkr) / product.original_price_pkr) * 100,
         )
+      : 0;
+  const savings =
+    product.original_price_pkr && product.original_price_pkr > product.price_pkr
+      ? product.original_price_pkr - product.price_pkr
       : 0;
 
   const originalStock = product.original_stock ?? Math.max(product.stock + 1, 3);
@@ -67,17 +72,24 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <WishlistButton productId={product.id} productName={product.name} className="h-11 w-11" />
       </div>
 
-      <div className="flex items-baseline gap-3">
-        <p className="font-display text-3xl font-semibold">{formatPKR(product.price_pkr)}</p>
-        {product.original_price_pkr && product.original_price_pkr > product.price_pkr && (
-          <>
-            <p className="text-base text-muted-foreground line-through">
-              {formatPKR(product.original_price_pkr)}
-            </p>
-            <span className="rounded-full bg-accent-red/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-red">
-              Save {discount}%
-            </span>
-          </>
+      <div>
+        <div className="flex items-baseline gap-3">
+          <p className="font-display text-3xl font-semibold">{formatPKR(product.price_pkr)}</p>
+          {product.original_price_pkr && product.original_price_pkr > product.price_pkr && (
+            <>
+              <p className="text-base text-muted-foreground line-through">
+                {formatPKR(product.original_price_pkr)}
+              </p>
+              <span className="rounded-full bg-accent-red/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-red">
+                Save {discount}%
+              </span>
+            </>
+          )}
+        </div>
+        {savings > 0 && (
+          <p className="mt-1.5 text-xs font-medium text-accent-red">
+            You save {formatPKR(savings)}
+          </p>
         )}
       </div>
 
@@ -138,6 +150,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       )}
 
       <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
+
+      {!soldOut && <DeliveryEstimate />}
 
       {soldOut ? (
         <RestockNotify productName={product.name} />

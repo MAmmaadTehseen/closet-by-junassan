@@ -8,6 +8,7 @@ import HowCodWorks from "@/components/home/HowCodWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
 import StoriesBar from "@/components/home/StoriesBar";
+import TrustStrip from "@/components/home/TrustStrip";
 import { fetchProducts } from "@/lib/products";
 import { fetchCategories } from "@/lib/categories";
 import { fetchActiveDrops } from "@/lib/drops";
@@ -33,6 +34,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
+      <TrustStrip />
       <StoriesBar drops={drops} />
       <InstagramMosaic products={newArrivals} />
       <CategoryGrid categories={categories} counts={categoryCounts} />
