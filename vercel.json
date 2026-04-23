@@ -1,6 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/activate", "schedule": "*/15 * * * *" },
+   
     { "path": "/api/cron/abandoned", "schedule": "0 * * * *" }
   ]
 }
