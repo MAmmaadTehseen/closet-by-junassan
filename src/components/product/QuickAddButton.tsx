@@ -17,6 +17,7 @@ export default function QuickAddButton({
 }) {
   const add = useCart((s) => s.add);
   const openCart = useUi((s) => s.openCart);
+  const flashCartItem = useUi((s) => s.flashCartItem);
   const [done, setDone] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const soldOut = product.stock === 0;
@@ -38,6 +39,7 @@ export default function QuickAddButton({
       quantity: 1,
       maxStock: product.stock,
     });
+    flashCartItem(product.id);
     setDone(true);
     toast.success(`Added to bag — ${product.name}`);
     openCart();

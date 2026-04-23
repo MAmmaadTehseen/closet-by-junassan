@@ -17,6 +17,15 @@ Format:
 
 ---
 
+## 2026-04-23 09:30 UTC — claude/auto-20260423-0930
+- Goal: Close the add-to-cart interaction loop by pulsing the drawer row for the just-added item, so the user sees a confirmation beat after the fly-to-cart arc lands (feature-ideas #12).
+- Changed:
+  - `src/lib/ui-store.ts` — added `lastAddedId` + `flashCartItem(id)`. The action nulls then sets after 16ms so re-adding the same item retriggers the CSS animation; auto-clears after 800ms via a module-scoped timer.
+  - `src/app/globals.css` — new `@keyframes cart-row-pop` + `.cart-row-pop` (cream bg flash + tiny 1.012 scale, 0.75s). Reduced-motion already neutralized by the global block.
+  - `src/components/cart/CartDrawer.tsx` — read `lastAddedId` from store, apply `cart-row-pop` on the matching `<li>`. Derivation only — no `useEffect`/`setState` (avoids the React 19 `react-hooks/set-state-in-effect` rule).
+  - `src/components/product/AddToCartButton.tsx` / `QuickAddButton.tsx` / `StickyBuyBar.tsx` — call `flashCartItem(product.id)` alongside the existing `add()`/`openCart()`.
+- Outcome: PR open — typecheck clean, lint clean on touched files, `/`, `/product/<slug>`, `/collections/all` all return 200 in dev. No new deps. CSS keyframe + `flashCartItem` confirmed present in shipped CSS and client JS bundles. Same note as the prior run on the missing `public/fonts/Ceramic.otf` (used a system OTF as placeholder for the dev smoke test only; not committed).
+
 ## 2026-04-23 08:45 UTC — claude/auto-20260423-0845
 - Goal: Defer mount of delight widgets (SocialProof / ExitIntent / CursorCompanion) behind `requestIdleCallback` so their JS parse cost stays out of the user's first interactive window (feature-ideas #16).
 - Changed:

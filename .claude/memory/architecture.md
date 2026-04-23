@@ -132,7 +132,7 @@ If Supabase is unavailable the action validates against seed stock and still red
 ### Client state
 - `lib/cart-store.ts` — Zustand + persist (`localStorage` key `closet-cart`). `add/remove/setQty/clear/replace`, `count()`, `subtotal()`. `add` clamps to `maxStock`.
 - `lib/wishlist-store.ts` — Zustand + persist (`closet-wishlist`). IDs only.
-- `lib/ui-store.ts` — in-memory Zustand (no persist). `cartOpen`, `searchOpen`, `filtersOpen` flags + `open*/close*` actions. Cart drawer, search palette, mobile filters drawer all read this.
+- `lib/ui-store.ts` — in-memory Zustand (no persist). `cartOpen`, `searchOpen`, `filtersOpen` flags + `open*/close*` actions. Cart drawer, search palette, mobile filters drawer all read this. Also owns the transient `lastAddedId` + `flashCartItem(id)` that drives the drawer-row `cart-row-pop` animation; store action owns the set/clear timer so consumers derive the class directly (no setState-in-effect).
 - `lib/recent-store.ts` — recently-viewed IDs.
 
 `ClientShell.tsx` mounts the always-present client UI (Toaster, CartDrawer, SearchPalette dynamically with ssr:false, RegisterSW, BackToTop, SocialProof, ExitIntent, CursorCompanion, InstallPrompt).

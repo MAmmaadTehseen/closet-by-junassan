@@ -20,6 +20,7 @@ export default function StickyBuyBar({
   const [visible, setVisible] = useState(false);
   const add = useCart((s) => s.add);
   const openCart = useUi((s) => s.openCart);
+  const flashCartItem = useUi((s) => s.flashCartItem);
   const soldOut = product.stock === 0;
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export default function StickyBuyBar({
       quantity: 1,
       maxStock: product.stock,
     });
+    flashCartItem(product.id);
     toast.success(`Added to bag — ${product.name}`);
     openCart();
   };
