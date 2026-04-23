@@ -11,6 +11,7 @@ import { formatPKR } from "@/lib/format";
 export default function CartDrawer() {
   const open = useUi((s) => s.cartOpen);
   const close = useUi((s) => s.closeCart);
+  const bumpId = useUi((s) => s.lastAddedId);
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
@@ -39,7 +40,12 @@ export default function CartDrawer() {
         <div className="flex h-full flex-col">
           <ul className="flex-1 divide-y divide-border overflow-y-auto px-5">
             {items.map((item) => (
-              <li key={item.id} className="flex gap-4 py-4">
+              <li
+                key={item.id}
+                className={
+                  "flex gap-4 py-4" + (bumpId === item.id ? " cart-row-pop" : "")
+                }
+              >
                 <Link
                   href={`/product/${item.slug}`}
                   onClick={close}

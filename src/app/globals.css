@@ -304,6 +304,13 @@ body {
 }
 .cart-bump { animation: cart-bump 0.55s cubic-bezier(0.22, 1.4, 0.36, 1); }
 
+@keyframes cart-row-pop {
+  0%   { background-color: var(--cream); transform: scale(0.985); }
+  35%  { background-color: var(--cream); transform: scale(1.012); }
+  100% { background-color: transparent;  transform: scale(1); }
+}
+.cart-row-pop { animation: cart-row-pop 0.75s cubic-bezier(0.22, 1, 0.36, 1); }
+
 @keyframes bar-rise {
   from { transform: translateY(100%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
