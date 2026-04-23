@@ -6,6 +6,7 @@ import Toaster from "@/components/ui/Toaster";
 import CartDrawer from "@/components/cart/CartDrawer";
 import RegisterSW from "@/components/app-shell/RegisterSW";
 import BackToTop from "@/components/ui/BackToTop";
+import ScrollProgress from "@/components/ui/ScrollProgress";
 
 const SearchPalette = dynamic(() => import("@/components/search/SearchPalette"), {
   ssr: false,
@@ -22,10 +23,14 @@ const CursorCompanion = dynamic(() => import("@/components/ui/CursorCompanion"),
 const InstallPrompt = dynamic(() => import("@/components/ui/InstallPrompt"), {
   ssr: false,
 });
+const FloatingWhatsApp = dynamic(() => import("@/components/ui/FloatingWhatsApp"), {
+  ssr: false,
+});
 
 export default function ClientShell({ products }: { products: Product[] }) {
   return (
     <>
+      <ScrollProgress />
       <Toaster />
       <CartDrawer />
       <SearchPalette products={products} />
@@ -35,6 +40,7 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <ExitIntent />
       <CursorCompanion />
       <InstallPrompt />
+      <FloatingWhatsApp />
     </>
   );
 }
