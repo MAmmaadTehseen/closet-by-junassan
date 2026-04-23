@@ -24,7 +24,7 @@ closet-by-junassan/
 │   │   ├── cart/             — CartDrawer, CartView
 │   │   ├── checkout/         — CheckoutForm, ClearCartOnSuccess, CopyCode, ReferralShare
 │   │   ├── admin/            — AdminForm, ProductForm, CollectionProductPicker, ImageUploader, charts/…
-│   │   ├── app-shell/        — ClientShell (mounts drawers/palette), RegisterSW
+│   │   ├── app-shell/        — ClientShell (mounts drawers/palette), RegisterSW, IdleMount (defers children until requestIdleCallback / 2s timeout fallback)
 │   │   ├── search/           — SearchPalette (cmd-k)
 │   │   └── ui/               — Accordion, Drawer, Modal, Toaster, Reveal, BackToTop, ExitIntent,
 │   │                           SocialProof, InstallPrompt, Skeleton, MagneticButton, Marquee, ...
