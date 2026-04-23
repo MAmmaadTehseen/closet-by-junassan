@@ -30,3 +30,11 @@ _Ideas that were considered and turned down, with why — so we don't re-debate 
 
 <!-- e.g. "No online payment gateway yet — COD only, until volume justifies the reconciliation overhead." -->
 <!-- e.g. "No per-user accounts on storefront — everything is phone/email keyed, guest-first." -->
+
+---
+
+### 2026-04-23 — ESLint ban on admin-supabase imports lives inline in `eslint.config.mjs`, not as a separate `eslint-plugin-local` package
+
+The "`@/lib/supabase/admin` must not be imported from a `\"use client\"` file" invariant is enforced as a small rule defined inline in `eslint.config.mjs` under the `local` plugin key. Reason: it's the only custom rule this repo needs, so a whole `eslint-plugin-local/` workspace package (separate `package.json`, build step, npm link) would be dead weight. Flat-config's `plugins: { local: { rules: { ... } } }` supports inline plugin objects natively. If a second custom rule shows up later, promote both to a real package then — not preemptively.
+
+Rejected: using `no-restricted-imports` with a `patterns` glob like `src/components/**/*`. Glob ≠ `"use client"` — server components also live under `src/components/` (e.g. `ProductCard.tsx` and a few others are RSCs). The AST-level directive check is the only accurate signal.

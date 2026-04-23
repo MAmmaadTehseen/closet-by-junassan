@@ -38,7 +38,7 @@ Concrete, codebase-grounded ideas. Each is scoped small enough to land in a focu
 
 13. **Supabase-backed preview data seed script** — `SEED_PRODUCTS` covers reads but not orders/reviews/Q&A. A one-shot `scripts/seed-preview.mjs` that hydrates a preview Supabase project with a plausible cross-section would make `/admin/*` pages demoable without manually clicking through each CRUD. Rationale: admin pages currently render mostly empty on fresh environments, which makes reviewing UI changes to them a pain.
 
-14. **ESLint rule banning raw admin-supabase imports from client files** — `supabase/admin.ts` has `import "server-only"` + a runtime throw, but a stray `"use client"` file that imports it would fail at runtime rather than at lint. A narrow `no-restricted-imports` rule (or custom `eslint-plugin-local`) saying `@/lib/supabase/admin` is forbidden in files with `"use client"` catches the class of mistake at save. Rationale: the worst outcome here (service-role key in bundle) is severe enough to warrant a belt-and-braces check.
+14. **ESLint rule banning raw admin-supabase imports from client files** — `supabase/admin.ts` has `import "server-only"` + a runtime throw, but a stray `"use client"` file that imports it would fail at runtime rather than at lint. A narrow `no-restricted-imports` rule (or custom `eslint-plugin-local`) saying `@/lib/supabase/admin` is forbidden in files with `"use client"` catches the class of mistake at save. Rationale: the worst outcome here (service-role key in bundle) is severe enough to warrant a belt-and-braces check. _(in PR: claude/auto-20260423-1238 — landed as inline flat-config rule `local/no-admin-supabase-in-client` in `eslint.config.mjs`)_
 
 ## Performance
 
