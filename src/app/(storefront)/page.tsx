@@ -1,4 +1,4 @@
-import VideoHero from "@/components/home/VideoHero";
+import HeroEditorial from "@/components/home/HeroEditorial";
 import ProductCarousel from "@/components/home/ProductCarousel";
 import ShopByBrand from "@/components/home/ShopByBrand";
 import HowCodWorks from "@/components/home/HowCodWorks";
@@ -17,7 +17,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <VideoHero />
+      <HeroEditorial />
       <ProductCarousel
         eyebrow="New Arrivals"
         title="Fresh off the rail."

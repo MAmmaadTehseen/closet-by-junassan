@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/hooks/use-t";
+import type { TranslationKey } from "@/lib/i18n";
 
 type SubLink = { label: string; href: string };
-type MenuItem = { label: string; href: string; panel?: SubLink[] };
+type MenuItem = { label: string; labelKey?: TranslationKey; href: string; panel?: SubLink[] };
 
 const MENU: MenuItem[] = [
   {
     label: "Men",
+    labelKey: "nav.men",
     href: "/collections/all?gender=men",
     panel: [
       { label: "Clothing", href: "/collections/all?gender=men&type=clothing" },
@@ -20,6 +23,7 @@ const MENU: MenuItem[] = [
   },
   {
     label: "Women",
+    labelKey: "nav.women",
     href: "/collections/all?gender=women",
     panel: [
       { label: "Clothing", href: "/collections/all?gender=women&type=clothing" },
@@ -31,6 +35,7 @@ const MENU: MenuItem[] = [
   },
   {
     label: "Shoes",
+    labelKey: "nav.shoes",
     href: "/collections/all?type=shoes",
     panel: [
       { label: "Mens", href: "/collections/all?type=shoes&gender=men" },
@@ -38,13 +43,14 @@ const MENU: MenuItem[] = [
       { label: "Kids", href: "/collections/all?type=shoes&gender=kids" },
     ],
   },
-  { label: "Collections", href: "/collections/all" },
-  { label: "Deals", href: "/deals" },
+  { label: "Collections", labelKey: "nav.collections", href: "/collections/all" },
+  { label: "Deals", labelKey: "nav.deals", href: "/deals" },
 ];
 
 export default function MegaMenu() {
   const [open, setOpen] = useState<string | null>(null);
   const closeTimer = useRef<number | null>(null);
+  const t = useT();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -90,7 +96,7 @@ export default function MegaMenu() {
                   isOpen ? "text-ink" : "text-ink/75 hover:text-ink"
                 }`}
               >
-                <span>{item.label}</span>
+                <span>{item.labelKey ? t(item.labelKey) : item.label}</span>
                 <span
                   className={`absolute -bottom-0.5 left-0 h-px bg-ink transition-all duration-300 ${
                     isOpen ? "right-0" : "right-full"

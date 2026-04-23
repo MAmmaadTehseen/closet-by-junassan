@@ -12,6 +12,7 @@ import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
 import LangToggle from "@/components/layout/LangToggle";
 import MegaMenu, { MEGA_MENU } from "@/components/layout/MegaMenu";
+import { useT } from "@/hooks/use-t";
 
 export default function Header() {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export default function Header() {
   const wishCount = useWishlist((s) => s.ids.length);
   const openCart = useUi((s) => s.openCart);
   const openSearch = useUi((s) => s.openSearch);
+  const t = useT();
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
@@ -41,7 +43,7 @@ export default function Header() {
             <button
               className="rounded-md p-2 lg:hidden focus-ring"
               onClick={() => setOpen(true)}
-              aria-label="Open menu"
+              aria-label={t("nav.menu_open")}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -59,7 +61,7 @@ export default function Header() {
             <button
               onClick={openSearch}
               className="rounded-full p-2.5 text-ink hover:bg-cream focus-ring"
-              aria-label="Search"
+              aria-label={t("nav.search")}
             >
               <Search className="h-5 w-5" />
             </button>
@@ -67,7 +69,7 @@ export default function Header() {
             <Link
               href="/wishlist"
               className="relative hidden rounded-full p-2.5 text-ink hover:bg-cream focus-ring sm:inline-flex"
-              aria-label="Wishlist"
+              aria-label={t("nav.wishlist")}
             >
               <Heart className="h-5 w-5" />
               {mounted && wishCount > 0 && (
@@ -80,7 +82,7 @@ export default function Header() {
               id="cart-target"
               onClick={openCart}
               className="relative rounded-full p-2.5 text-ink hover:bg-cream focus-ring"
-              aria-label="Cart"
+              aria-label={t("nav.cart")}
             >
               <ShoppingBag className="h-5 w-5" />
               {mounted && cartCount > 0 && (
@@ -110,7 +112,7 @@ export default function Header() {
               </Link>
               <button
                 onClick={() => setOpen(false)}
-                aria-label="Close menu"
+                aria-label={t("nav.menu_close")}
                 className="rounded-full p-2 hover:bg-cream focus-ring"
               >
                 <X className="h-5 w-5" />
@@ -118,6 +120,7 @@ export default function Header() {
             </div>
             <nav className="flex flex-col">
               {MEGA_MENU.map((item) => {
+                const label = item.labelKey ? t(item.labelKey) : item.label;
                 if (!item.panel) {
                   return (
                     <Link
@@ -126,7 +129,7 @@ export default function Header() {
                       onClick={() => setOpen(false)}
                       className="border-b border-border py-4 text-base font-medium uppercase tracking-[0.12em]"
                     >
-                      {item.label}
+                      {label}
                     </Link>
                   );
                 }
@@ -140,7 +143,7 @@ export default function Header() {
                       }
                       aria-expanded={expanded}
                     >
-                      <span>{item.label}</span>
+                      <span>{label}</span>
                       <ChevronDown
                         className={`h-4 w-4 transition-transform ${
                           expanded ? "rotate-180" : ""
@@ -169,28 +172,28 @@ export default function Header() {
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2 border-b border-border py-4 text-base font-medium"
               >
-                <Heart className="h-4 w-4" /> Wishlist
+                <Heart className="h-4 w-4" /> {t("nav.wishlist")}
               </Link>
               <Link
                 href="/my"
                 onClick={() => setOpen(false)}
                 className="border-b border-border py-4 text-base font-medium"
               >
-                My Orders
+                {t("nav.my_orders")}
               </Link>
               <Link
                 href="/about"
                 onClick={() => setOpen(false)}
                 className="border-b border-border py-4 text-base font-medium"
               >
-                About
+                {t("nav.about")}
               </Link>
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
                 className="border-b border-border py-4 text-base font-medium"
               >
-                Contact
+                {t("nav.contact")}
               </Link>
             </nav>
             <div className="mt-8 flex gap-3">

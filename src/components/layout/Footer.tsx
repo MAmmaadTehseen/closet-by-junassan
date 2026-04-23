@@ -2,8 +2,10 @@ import Link from "next/link";
 import { siteConfig, waLink } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon, WhatsAppIcon } from "@/components/ui/brand-icons";
 import type { CategoryDef } from "@/lib/categories";
+import { getT } from "@/lib/i18n-server";
 
-export default function Footer({ categories = [] }: { categories?: CategoryDef[] }) {
+export default async function Footer({ categories = [] }: { categories?: CategoryDef[] }) {
+  const t = await getT();
   return (
     <footer className="mt-20 border-t border-border bg-cream/50">
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-8 sm:px-6">
@@ -11,8 +13,7 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
           <div>
             <h3 className="font-display text-2xl font-semibold">{siteConfig.name}</h3>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Curated thrift fashion from the brands you love — hand-picked, inspected,
-              and priced for Pakistan.
+              {t("footer.tagline")}
             </p>
             <div className="mt-6 flex items-center gap-3">
               <a
@@ -21,7 +22,7 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-[#25D366] py-2 pl-2 pr-4 text-xs font-semibold uppercase tracking-wide text-white transition hover:opacity-90"
               >
-                <WhatsAppIcon className="h-5 w-5" /> WhatsApp Us
+                <WhatsAppIcon className="h-5 w-5" /> {t("footer.whatsapp_us")}
               </a>
               <a
                 href={siteConfig.socials.instagram}
@@ -45,7 +46,7 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
           </div>
 
           <div>
-            <p className="eyebrow">Shop</p>
+            <p className="eyebrow">{t("footer.col_shop")}</p>
             <ul className="mt-4 space-y-2.5 text-sm">
               {categories.map((c) => (
                 <li key={c.slug}>
@@ -56,37 +57,37 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
               ))}
               <li>
                 <Link className="text-ink/80 hover:text-ink" href="/deals">
-                  Under 2000 PKR
+                  {t("footer.under_2000")}
                 </Link>
               </li>
               <li>
                 <Link className="text-ink/80 hover:text-ink" href="/collections/all">
-                  All Products
+                  {t("footer.all_products")}
                 </Link>
               </li>
               <li>
                 <Link className="text-ink/80 hover:text-ink" href="/accessories">
-                  Accessories
+                  {t("footer.accessories")}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <p className="eyebrow">Help</p>
+            <p className="eyebrow">{t("footer.col_help")}</p>
             <ul className="mt-4 space-y-2.5 text-sm">
-              <li><Link className="text-ink/80 hover:text-ink" href="/about">About</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact">Contact</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact#faq">FAQ</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact">Returns & Sizing</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/track">Track Order</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/privacy">Privacy Policy</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/terms">Terms</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/about">{t("nav.about")}</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/contact">{t("nav.contact")}</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/contact#faq">{t("footer.faq")}</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/contact">{t("footer.returns")}</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/track">{t("footer.track")}</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/privacy">{t("footer.privacy")}</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/terms">{t("footer.terms")}</Link></li>
             </ul>
           </div>
 
           <div>
-            <p className="eyebrow">Connect</p>
+            <p className="eyebrow">{t("footer.col_connect")}</p>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li><a className="text-ink/80 hover:text-ink" href={waLink()} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
               <li><a className="text-ink/80 hover:text-ink" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a></li>
@@ -104,7 +105,7 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
             Closet by Junassan
           </p>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+            © {new Date().getFullYear()} {siteConfig.name}. {t("footer.rights")}
           </p>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { toast } from "@/components/ui/Toaster";
 import { formatPKR } from "@/lib/format";
 import { flyToCart } from "@/lib/fly-to-cart";
 import type { Product } from "@/lib/types";
+import { useT } from "@/hooks/use-t";
 
 export default function StickyBuyBar({
   product,
@@ -21,6 +22,7 @@ export default function StickyBuyBar({
   const add = useCart((s) => s.add);
   const openCart = useUi((s) => s.openCart);
   const flashCartItem = useUi((s) => s.flashCartItem);
+  const t = useT();
   const soldOut = product.stock === 0;
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function StickyBuyBar({
       maxStock: product.stock,
     });
     flashCartItem(product.id);
-    toast.success(`Added to bag — ${product.name}`);
+    toast.success(t("product.added_toast", { name: product.name }));
     openCart();
   };
 
@@ -76,7 +78,7 @@ export default function StickyBuyBar({
           onClick={onAdd}
           className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-paper transition hover:opacity-90 focus-ring"
         >
-          <ShoppingBag className="h-3.5 w-3.5" /> Add
+          <ShoppingBag className="h-3.5 w-3.5" /> {t("product.add")}
         </button>
       </div>
     </div>

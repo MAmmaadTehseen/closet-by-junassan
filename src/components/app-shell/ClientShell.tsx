@@ -7,6 +7,7 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import RegisterSW from "@/components/app-shell/RegisterSW";
 import BackToTop from "@/components/ui/BackToTop";
 import IdleMount from "@/components/app-shell/IdleMount";
+import LenisProvider from "@/components/app-shell/LenisProvider";
 
 const SearchPalette = dynamic(() => import("@/components/search/SearchPalette"), {
   ssr: false,
@@ -27,6 +28,7 @@ const InstallPrompt = dynamic(() => import("@/components/ui/InstallPrompt"), {
 export default function ClientShell({ products }: { products: Product[] }) {
   return (
     <>
+      <LenisProvider />
       <Toaster />
       <CartDrawer />
       <SearchPalette products={products} />

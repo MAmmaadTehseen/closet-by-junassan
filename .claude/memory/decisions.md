@@ -18,6 +18,14 @@ _What problem this store is solving, who it serves, and which outcomes matter._
 
 _The aesthetic and UX rules that changes should stay inside._
 
+### 2026-04-24 — Editorial hero with a cursor-spotlight signature
+
+The homepage hero is an editorial composition — eyebrow, oversize display headline (split across two lines with the second line italicized), short subheading, dual CTAs, and a row of three reassurance stats (rating / COD / drops). The background video previously used by `VideoHero` was dropped: the animation signature lives in the **cursor-tracked radial spotlight** instead, which layers two soft `radial-gradient` blobs (ink + accent-red, `mix-blend-mode: multiply`) that lerp toward the pointer. The video asset was net-neutral for brand expression and net-negative for LCP on PK mobile; the spotlight is all CSS + ~30 lines of rAF pointer-tracking and scales well on low-end devices.
+
+### 2026-04-24 — Cursor interactions gate on pointer: fine + prefers-reduced-motion
+
+Any new cursor-reactive effect we add must `matchMedia` on both `(pointer: fine)` and `(prefers-reduced-motion: reduce)` and render a static fallback (not no fallback) when either fails. The `HeroSpotlight` component is the reference implementation. Rejected: WebGL/shader hero effects — the closet-by-junassan audience is mobile-heavy and bandwidth-sensitive; the cost is visible to 95% of users while the effect only pays off for 5%.
+
 ### 2026-04-24 — One display serif, and it's Playfair Display
 
 The storefront uses a single serif everywhere; no secondary typeface. That serif is **Playfair Display** (Google Font, OFL licensed — free for commercial use), loaded via `next/font/google` in `src/app/layout.tsx` and exposed as the `--font-ceramic` CSS variable. The variable name is retained as a stable indirection point: if a licensed Ceramic font is ever acquired, only `layout.tsx` changes.
@@ -26,6 +34,14 @@ The storefront uses a single serif everywhere; no secondary typeface. That serif
 <!-- e.g. "Mobile-first always; desktop is a polish layer." -->
 
 ---
+
+### 2026-04-24 — Smooth scroll is Lenis, not Locomotive / not Framer / not GSAP
+
+Interpolated wheel/touch scroll is provided by `lenis` (~3 KB gz, zero peer deps). It's initialized once in `src/components/app-shell/LenisProvider.tsx` with a short `duration: 1.15` and a `1 − (1 − x)^3` ease, driven by a single `requestAnimationFrame` loop. The provider refuses to initialize when `prefers-reduced-motion: reduce` is set — in that case, native scrolling plus the existing `html { scroll-behavior: smooth }` take over. We rejected Locomotive Scroll (heavier, does its own layout), Framer Motion's scroll bits (the rest of the app doesn't use FM so pulling it in for scroll alone is disproportionate), and hand-rolling it (the edge cases — nested scroll containers, anchor navigation, iframes — are not worth the bytes saved).
+
+### 2026-04-24 — i18n split: pure `i18n.ts` + server-only `i18n-server.ts` + client `useT()` via context
+
+The i18n module had to be callable from both RSCs and client components, but the cookie read (`getLang`) uses `next/headers` which breaks client bundles under Turbopack. The resolution: `src/lib/i18n.ts` contains _only_ the pure, bundler-safe pieces (`DICT`, `Lang` / `TranslationKey` types, sync `t(key, lang, vars)` with `{var}` interpolation), and a new `src/lib/i18n-server.ts` holds everything `next/headers`-dependent behind `import "server-only"`. Client components never call `t()` directly with a `lang` argument — they read the language via `I18nProvider` (mounted once in the root layout with `lang` pulled from the server-side cookie read) and consume it through `useT()` / `useLang()` in `src/hooks/use-t.ts`. Rejected: (a) having every client component read `document.cookie` itself — that duplicates the lookup, races `router.refresh()`, and leaks the cookie name to N files; (b) a single combined module with runtime branching on `typeof window` — Turbopack still eagerly evaluates `next/headers` and errors the build. The provider pattern is the canonical RSC-era solution and keeps the sync path on the client.
 
 ## Things we explicitly rejected
 

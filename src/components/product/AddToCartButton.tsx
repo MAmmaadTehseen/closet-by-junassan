@@ -8,6 +8,7 @@ import { toast } from "@/components/ui/Toaster";
 import { flyToCart } from "@/lib/fly-to-cart";
 import MagneticButton from "@/components/ui/MagneticButton";
 import type { Product } from "@/lib/types";
+import { useT } from "@/hooks/use-t";
 
 export default function AddToCartButton({
   product,
@@ -20,6 +21,7 @@ export default function AddToCartButton({
   const openCart = useUi((s) => s.openCart);
   const flashCartItem = useUi((s) => s.flashCartItem);
   const router = useRouter();
+  const t = useT();
   const soldOut = product.stock === 0;
 
   const doAdd = () => {
@@ -34,7 +36,7 @@ export default function AddToCartButton({
       maxStock: product.stock,
     });
     flashCartItem(product.id);
-    toast.success(`Added to bag — ${product.name}`);
+    toast.success(t("product.added_toast", { name: product.name }));
   };
 
   const flyFromGallery = () => {
@@ -55,7 +57,7 @@ export default function AddToCartButton({
           className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90 disabled:opacity-50 focus-ring"
         >
           <ShoppingBag className="h-4 w-4" />
-          {soldOut ? "Sold out" : "Add to Bag"}
+          {soldOut ? t("product.sold_out") : t("product.add_to_bag")}
         </button>
       </MagneticButton>
       <MagneticButton className="flex-1">
@@ -67,7 +69,7 @@ export default function AddToCartButton({
           disabled={soldOut}
           className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-paper disabled:opacity-50 focus-ring"
         >
-          <Zap className="h-4 w-4" /> Buy Now
+          <Zap className="h-4 w-4" /> {t("product.buy_now")}
         </button>
       </MagneticButton>
     </div>
