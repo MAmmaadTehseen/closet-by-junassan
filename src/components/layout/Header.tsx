@@ -169,6 +169,41 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
                 <Heart className="h-4 w-4" /> Wishlist
               </Link>
               <Link
+                href="/bundles"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Shop the Look
+              </Link>
+              <Link
+                href="/rewards"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Rewards
+              </Link>
+              <Link
+                href="/gift-cards"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Gift Cards
+              </Link>
+              <Link
+                href="/journal"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Journal
+              </Link>
+              <Link
+                href="/faq"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                FAQ
+              </Link>
+              <Link
                 href="/about"
                 onClick={() => setOpen(false)}
                 className="border-b border-border py-4 text-base font-medium"

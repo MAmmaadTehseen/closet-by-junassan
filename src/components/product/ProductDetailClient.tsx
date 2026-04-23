@@ -7,6 +7,9 @@ import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
+import CompareButton from "./CompareButton";
+import DeliveryEstimator from "./DeliveryEstimator";
+import PriceDropAlert from "./PriceDropAlert";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
@@ -144,6 +147,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       ) : (
         <AddToCartButton product={product} selectedSize={selectedSize} />
       )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <PriceDropAlert productId={product.id} price={product.price_pkr} />
+        <CompareButton productId={product.id} productName={product.name} />
+      </div>
+
+      <DeliveryEstimator />
 
       <div className="flex items-center gap-2">
         <a

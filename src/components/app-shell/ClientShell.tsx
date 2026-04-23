@@ -6,6 +6,8 @@ import Toaster from "@/components/ui/Toaster";
 import CartDrawer from "@/components/cart/CartDrawer";
 import RegisterSW from "@/components/app-shell/RegisterSW";
 import BackToTop from "@/components/ui/BackToTop";
+import CompareBar from "@/components/product/CompareBar";
+import KeyboardShortcuts from "@/components/ui/KeyboardShortcuts";
 
 const SearchPalette = dynamic(() => import("@/components/search/SearchPalette"), {
   ssr: false,
@@ -27,6 +29,8 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <BackToTop />
       <SocialProof />
       <ExitIntent />
+      <CompareBar />
+      <KeyboardShortcuts />
     </>
   );
 }

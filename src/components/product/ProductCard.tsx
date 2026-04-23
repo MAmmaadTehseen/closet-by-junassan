@@ -5,6 +5,7 @@ import type { Product } from "@/lib/types";
 import WishlistButton from "./WishlistButton";
 import QuickAddButton from "./QuickAddButton";
 import QuickViewButton from "./QuickViewButton";
+import CompareButton from "./CompareButton";
 
 export default function ProductCard({
   product,
@@ -75,8 +76,11 @@ export default function ProductCard({
 
           {/* Quick view — bottom-left, shows on hover (desktop) */}
           {!onlyOne && (
-            <div className="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5">
+            <div className="absolute bottom-2 left-2 flex flex-col items-start gap-1.5 sm:bottom-2.5 sm:left-2.5">
               <QuickViewButton product={product} />
+              <div className="hidden sm:block">
+                <CompareButton productId={product.id} productName={product.name} />
+              </div>
             </div>
           )}
         </div>

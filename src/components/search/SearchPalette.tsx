@@ -3,11 +3,47 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, X, ArrowRight } from "lucide-react";
+import { Search, X, ArrowRight, TrendingUp, Clock } from "lucide-react";
 import { useUi } from "@/lib/ui-store";
 import { useKeyboard } from "@/lib/hooks/use-keyboard";
 import { formatPKR } from "@/lib/format";
 import type { Product } from "@/lib/types";
+
+const TRENDING = [
+  "Levis denim",
+  "Zara blazer",
+  "Nike sneakers",
+  "Uniqlo basics",
+  "H&M dress",
+  "Under 2000",
+  "Kids hoodie",
+  "Leather bag",
+];
+
+const RECENT_KEY = "closet-recent-searches";
+
+function readRecent(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function pushRecent(term: string) {
+  if (typeof window === "undefined") return;
+  const t = term.trim();
+  if (!t) return;
+  try {
+    const cur = readRecent().filter((x) => x.toLowerCase() !== t.toLowerCase());
+    const next = [t, ...cur].slice(0, 6);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    /* noop */
+  }
+}
 
 export default function SearchPalette({ products }: { products: Product[] }) {
   const open = useUi((s) => s.searchOpen);
@@ -15,6 +51,7 @@ export default function SearchPalette({ products }: { products: Product[] }) {
   const closeSearch = useUi((s) => s.closeSearch);
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
+  const [recent, setRecent] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useKeyboard((e) => {
@@ -35,6 +72,7 @@ export default function SearchPalette({ products }: { products: Product[] }) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setQ("");
       setActive(0);
+      setRecent(readRecent());
       setTimeout(() => inputRef.current?.focus(), 40);
       document.body.style.overflow = "hidden";
     } else {
@@ -70,8 +108,15 @@ export default function SearchPalette({ products }: { products: Product[] }) {
       setActive((a) => Math.max(a - 1, 0));
     }
     if (e.key === "Enter" && results[active]) {
+      pushRecent(q);
       window.location.href = `/product/${results[active].slug}`;
     }
+  };
+
+  const submitChip = (term: string) => {
+    setQ(term);
+    pushRecent(term);
+    setRecent(readRecent());
   };
 
   return (
@@ -97,11 +142,49 @@ export default function SearchPalette({ products }: { products: Product[] }) {
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto">
-          {results.length === 0 ? (
+          {!q.trim() && (
+            <div className="space-y-4 px-5 py-4">
+              {recent.length > 0 && (
+                <div>
+                  <p className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    <Clock className="h-3 w-3" /> Recent
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {recent.map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => submitChip(t)}
+                        className="rounded-full border border-border bg-paper px-3 py-1.5 text-xs hover:border-ink"
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div>
+                <p className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  <TrendingUp className="h-3 w-3" /> Trending now
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {TRENDING.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => submitChip(t)}
+                      className="rounded-full bg-cream px-3 py-1.5 text-xs text-ink hover:bg-ink hover:text-paper"
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          {q.trim() && results.length === 0 ? (
             <p className="px-5 py-10 text-center text-sm text-muted-foreground">
               No results. Try another keyword.
             </p>
-          ) : (
+          ) : q.trim() ? (
             <ul className="py-2">
               {results.map((p, i) => (
                 <li key={p.id}>
@@ -130,7 +213,7 @@ export default function SearchPalette({ products }: { products: Product[] }) {
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
         </div>
 
         <div className="flex items-center justify-between border-t border-border bg-cream/40 px-5 py-3 text-[11px] text-muted-foreground">

@@ -73,8 +73,8 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
             <ul className="mt-4 space-y-2.5 text-sm">
               <li><Link className="text-ink/80 hover:text-ink" href="/about">About</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/contact">Contact</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact#faq">FAQ</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact">Returns & Sizing</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/faq">FAQ</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/size-converter">Size Converter</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/track">Track Order</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/privacy">Privacy Policy</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/terms">Terms</Link></li>
@@ -82,12 +82,17 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
           </div>
 
           <div>
-            <p className="eyebrow">Connect</p>
+            <p className="eyebrow">Closet Club</p>
             <ul className="mt-4 space-y-2.5 text-sm">
+              <li><Link className="text-ink/80 hover:text-ink" href="/rewards">Rewards</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/bundles">Shop the Look</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/gift-cards">Gift Cards</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/referrals">Referrals</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/ambassadors">Ambassadors</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/journal">Journal</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/compare">Compare</Link></li>
               <li><a className="text-ink/80 hover:text-ink" href={waLink()} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
               <li><a className="text-ink/80 hover:text-ink" href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a></li>
-              <li><a className="text-ink/80 hover:text-ink" href={siteConfig.socials.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></li>
-              <li><a className="text-ink/80 hover:text-ink" href={siteConfig.socials.facebook} target="_blank" rel="noopener noreferrer">Facebook</a></li>
             </ul>
           </div>
         </div>
