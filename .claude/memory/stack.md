@@ -73,7 +73,7 @@ Rule: **new schema changes must be a new numbered file** (next is `0022_*.sql`).
 ## Security posture
 
 - RLS default-deny on `orders`, `order_items`, `contact_messages`, `subscribers`, `cart_recoveries`. Anon has SELECT only on `products`. All writes route through `SUPABASE_SERVICE_ROLE_KEY`, never exposed to the browser.
-- `createAdminClient()` is wrapped by `import "server-only"` and an explicit `typeof window !== "undefined"` throw.
+- `createAdminClient()` is wrapped by `import "server-only"` and an explicit `typeof window !== "undefined"` throw. ESLint rule `local/no-admin-in-client` (in `eslint-rules/index.mjs`) catches the same class of mistake at lint time by rejecting `@/lib/supabase/admin` imports inside `"use client"` files.
 - Order server action enforces: honeypot field, in-process rate limit (5/10min per IP-hash), idempotency cache (15min), server-side price rehydration in the RPC (prices can't be manipulated from the client payload).
 - `next.config.ts` sets `X-Content-Type-Options`, `X-Frame-Options: DENY`, strict Referrer-Policy, Permissions-Policy (no camera/mic/geo/interest-cohort), 2-year HSTS with preload.
 - Admin auth is **a single shared password** stored as env. The cookie is the sha256 of that password, httpOnly, `secure` in prod. No per-user identity, no password reset flow — adequate for a single-operator shop, not for multi-staff.

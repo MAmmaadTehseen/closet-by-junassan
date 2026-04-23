@@ -6,6 +6,19 @@ Format for new entries: `### YYYY-MM-DD — <title>` followed by the decision, t
 
 ---
 
+### 2026-04-23 — Guard service-role key leaks at lint time, not just runtime
+
+`@/lib/supabase/admin` (`SUPABASE_SERVICE_ROLE_KEY`) already has two runtime defenses: `import "server-only"` and a `typeof window !== "undefined"` throw in `createAdminClient()`. Added a third check at edit time: local ESLint rule `local/no-admin-in-client` (in `eslint-rules/index.mjs`) fails lint if any `"use client"` file imports the admin module, via static `import`, `import()`, or `require()`. Relative paths ending in `/lib/supabase/admin` are covered too.
+
+Reason: the blast radius of a single slip here (service-role key shipped in the browser bundle) is bad enough to warrant belt-and-braces. Lint is the earliest place we can shout.
+
+Rejected alternatives:
+- **`no-restricted-imports` with per-file overrides** — can't cleanly match on the `"use client"` directive without enumerating every client file. AST inspection is simpler and self-maintaining.
+- **Pure runtime trust** — `server-only` only throws if the module is actually evaluated; a dead-branch import could still land the key in a chunk.
+- **Hand-rolled env indirection** — over-engineered; the rule + `server-only` pair is sufficient.
+
+---
+
 ## Product direction
 
 _What problem this store is solving, who it serves, and which outcomes matter._

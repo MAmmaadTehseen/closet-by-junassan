@@ -40,7 +40,8 @@ closet-by-junassan/
 ├── public/                   — sw.js, offline.html, manifest.json, icons/, fonts/ (Ceramic.otf), videos/
 ├── next.config.ts            — security headers, image remote patterns, /shop → /collections/all redirect
 ├── vercel.json               — cron schedules for /api/cron/activate (15m) and /api/cron/abandoned (1h)
-├── eslint.config.mjs         — flat config extending eslint-config-next
+├── eslint.config.mjs         — flat config extending eslint-config-next + the local plugin
+├── eslint-rules/             — local ESLint plugin. `local/no-admin-in-client` blocks `@/lib/supabase/admin` imports in `"use client"` files
 ├── AGENTS.md / CLAUDE.md     — agent rules (Next.js 16 breaking — read node_modules/next/dist/docs/ first)
 └── README.md                 — public README
 ```
