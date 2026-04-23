@@ -103,4 +103,4 @@ These are the spots where "a reasonable change" has historically broken things. 
 
 10. **Service worker caching**. `public/sw.js` uses stale-while-revalidate for `/_next/static`. After deploys, clients can briefly run mixed old+new chunks until SW updates. The `CACHE = "closet-v1"` constant is the only rollback lever — bump it when a breaking asset change lands, otherwise leave it alone.
 
-11. **Ceramic font**. `public/fonts/Ceramic.otf` is expected but **not checked in** (see `README.txt`). Missing font silently falls through to the declared fallback stack (Georgia/serif). If the site looks wrong on a fresh checkout, this is likely why.
+11. **Display serif**. `src/app/layout.tsx` loads **Playfair Display** from `next/font/google` and binds it to the CSS variable `--font-ceramic` (name kept for reversibility). The original "Ceramic" font was removed as a dependency because it's DaFont donationware — free for personal use only, commercial use requires a paid license from the author; see `decisions.md` for the rejection entry and `public/fonts/README.txt` for the swap-back procedure if a commercial Ceramic license is acquired later.
