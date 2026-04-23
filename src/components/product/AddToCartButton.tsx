@@ -18,6 +18,7 @@ export default function AddToCartButton({
 }) {
   const add = useCart((s) => s.add);
   const openCart = useUi((s) => s.openCart);
+  const flashCartItem = useUi((s) => s.flashCartItem);
   const router = useRouter();
   const soldOut = product.stock === 0;
 
@@ -32,6 +33,7 @@ export default function AddToCartButton({
       quantity: 1,
       maxStock: product.stock,
     });
+    flashCartItem(product.id);
     toast.success(`Added to bag — ${product.name}`);
   };
 

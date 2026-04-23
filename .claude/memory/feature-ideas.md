@@ -32,7 +32,7 @@ Concrete, codebase-grounded ideas. Each is scoped small enough to land in a focu
 
 11. **View-transition-backed product ↔ PDP morph** — wiring partially exists (`viewTransitionName: product-<id>` on `ProductCard.tsx` + PDP `Gallery`, plus `::view-transition-old/new` CSS in `globals.css`). Currently runs only on same-origin full navigations. Verify it actually triggers on `/collections/all` → `/product/[slug]` and add a `document.startViewTransition` fallback on programmatic navigation. Rationale: the infrastructure cost has already been paid; this is a pure-polish payoff.
 
-12. **Cart-drawer item fly-in** — `lib/fly-to-cart.ts` animates an image arc to `#cart-target`, but the drawer itself doesn't react with a micro-bounce when the item lands. Add a short `cart-bump` pulse on the drawer's new row (animation already defined in `globals.css`). Rationale: closes the loop of the add-to-cart interaction; right now it "arrives" without a confirmation beat.
+12. **Cart-drawer item fly-in** — `lib/fly-to-cart.ts` animates an image arc to `#cart-target`, but the drawer itself doesn't react with a micro-bounce when the item lands. Add a short `cart-bump` pulse on the drawer's new row (animation already defined in `globals.css`). Rationale: closes the loop of the add-to-cart interaction; right now it "arrives" without a confirmation beat. _(in PR: claude/auto-20260423-0930 — new `cart-row-pop` keyframe + `ui-store.flashCartItem(id)` wired from the 3 add-to-bag call sites; drawer derives the bumped row from store state, no setState-in-effect)_
 
 ## DX
 
