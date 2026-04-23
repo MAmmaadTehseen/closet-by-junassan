@@ -6,6 +6,7 @@ import Toaster from "@/components/ui/Toaster";
 import CartDrawer from "@/components/cart/CartDrawer";
 import RegisterSW from "@/components/app-shell/RegisterSW";
 import BackToTop from "@/components/ui/BackToTop";
+import IdleMount from "@/components/app-shell/IdleMount";
 
 const SearchPalette = dynamic(() => import("@/components/search/SearchPalette"), {
   ssr: false,
@@ -31,9 +32,11 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <SearchPalette products={products} />
       <RegisterSW />
       <BackToTop />
-      <SocialProof />
-      <ExitIntent />
-      <CursorCompanion />
+      <IdleMount>
+        <SocialProof />
+        <ExitIntent />
+        <CursorCompanion />
+      </IdleMount>
       <InstallPrompt />
     </>
   );
