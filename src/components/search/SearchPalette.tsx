@@ -54,6 +54,18 @@ export default function SearchPalette({ products }: { products: Product[] }) {
       .slice(0, 8);
   }, [q, products]);
 
+  // Top brands by stock count for the empty state.
+  const topBrands = useMemo(() => {
+    const tally: Record<string, number> = {};
+    for (const p of products) tally[p.brand] = (tally[p.brand] ?? 0) + 1;
+    return Object.entries(tally)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([name]) => name);
+  }, [products]);
+
+  const TRENDING = ["denim", "linen", "silk", "white shirt", "sneakers", "tote bag"];
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setActive(0), [q]);
 
@@ -95,6 +107,45 @@ export default function SearchPalette({ products }: { products: Product[] }) {
             <X className="h-4 w-4" />
           </button>
         </div>
+
+        {!q && (
+          <div className="border-b border-border px-5 py-3">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Trending searches
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {TRENDING.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setQ(t)}
+                  className="rounded-full border border-border bg-paper px-3 py-1 text-xs hover:border-ink"
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            {topBrands.length > 0 && (
+              <>
+                <p className="mb-2 mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Top brands
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {topBrands.map((b) => (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => setQ(b)}
+                      className="rounded-full border border-border bg-paper px-3 py-1 text-xs hover:border-ink"
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         <div className="max-h-[60vh] overflow-y-auto">
           {results.length === 0 ? (

@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Heart } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
 import { useCart } from "@/lib/cart-store";
 import { useUi } from "@/lib/ui-store";
+import { useWishlist } from "@/lib/wishlist-store";
 import { formatPKR } from "@/lib/format";
+import { toast } from "@/components/ui/Toaster";
+import FreeShippingMeter from "./FreeShippingMeter";
 
 export default function CartDrawer() {
   const open = useUi((s) => s.cartOpen);
@@ -14,7 +17,15 @@ export default function CartDrawer() {
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
+  const wishlistToggle = useWishlist((s) => s.toggle);
+  const wishlistHas = useWishlist((s) => s.has);
   const subtotal = items.reduce((n, i) => n + i.price_pkr * i.quantity, 0);
+
+  const saveForLater = (id: string, name: string) => {
+    if (!wishlistHas(id)) wishlistToggle(id);
+    remove(id);
+    toast.success(`${name} saved to wishlist`);
+  };
 
   return (
     <Drawer open={open} onClose={close} title="Your Bag">
@@ -37,6 +48,7 @@ export default function CartDrawer() {
         </div>
       ) : (
         <div className="flex h-full flex-col">
+          <FreeShippingMeter subtotal={subtotal} />
           <ul className="flex-1 divide-y divide-border overflow-y-auto px-5">
             {items.map((item) => (
               <li key={item.id} className="flex gap-4 py-4">
@@ -83,13 +95,22 @@ export default function CartDrawer() {
                         <Plus className="h-3 w-3" />
                       </button>
                     </div>
-                    <button
-                      onClick={() => remove(item.id)}
-                      className="text-xs text-muted-foreground hover:text-accent-red"
-                      aria-label="Remove"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => saveForLater(item.id, item.name)}
+                        className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground hover:text-ink"
+                        aria-label="Save for later"
+                      >
+                        <Heart className="h-3.5 w-3.5" /> Save
+                      </button>
+                      <button
+                        onClick={() => remove(item.id)}
+                        className="text-xs text-muted-foreground hover:text-accent-red"
+                        aria-label="Remove"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </li>

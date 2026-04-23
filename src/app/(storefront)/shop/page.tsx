@@ -5,6 +5,7 @@ import Filters from "@/components/shop/Filters";
 import SortSelect from "@/components/shop/SortSelect";
 import MobileFiltersDrawer from "@/components/shop/MobileFiltersDrawer";
 import FilterPills from "@/components/shop/FilterPills";
+import CategoryChips from "@/components/shop/CategoryChips";
 import ProductGrid from "@/components/product/ProductGrid";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import { fetchProducts } from "@/lib/products";
@@ -87,6 +88,10 @@ export default async function ShopPage({ searchParams }: { searchParams: SP }) {
           .
         </p>
       </div>
+
+      <Suspense fallback={null}>
+        <CategoryChips categories={categories} />
+      </Suspense>
 
       <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-paper p-3 sm:rounded-full sm:px-5">
         <MobileFiltersDrawer resultCount={count} categories={categories} />

@@ -24,6 +24,10 @@ export const siteConfig = {
     banner: "Cash on Delivery Available All Over Pakistan",
     note: "Flat delivery across Pakistan",
     deliveryDays: "3–5 working days",
+    /** Order subtotal (PKR) above which shipping is free. */
+    freeShippingThreshold: 3500,
+    /** Flat shipping fee (PKR) shown before threshold is met. */
+    flatFee: 250,
   },
 
   currency: {
@@ -37,6 +41,13 @@ export const siteConfig = {
     "3-day easy returns",
     "Pay when it arrives",
   ],
+
+  /** Loyalty program — 1 coin per N rupees spent; coins worth a fraction of a rupee. */
+  loyalty: {
+    name: "Closet Coins",
+    rupeesPerCoin: 100,
+    coinValueInRupees: 1,
+  },
 } as const;
 
 export const waLink = (msg = "Hi! I'd like to ask about a product."): string =>

@@ -61,6 +61,16 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                 </Link>
               </li>
               <li>
+                <Link className="text-ink/80 hover:text-ink" href="/brands">
+                  Brands
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/lookbook">
+                  Lookbook
+                </Link>
+              </li>
+              <li>
                 <Link className="text-ink/80 hover:text-ink" href="/shop">
                   All Products
                 </Link>
@@ -73,8 +83,8 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
             <ul className="mt-4 space-y-2.5 text-sm">
               <li><Link className="text-ink/80 hover:text-ink" href="/about">About</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/contact">Contact</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact#faq">FAQ</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact">Returns & Sizing</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/faq">FAQ</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/compare">Compare Pieces</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/track">Track Order</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/privacy">Privacy Policy</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/terms">Terms</Link></li>

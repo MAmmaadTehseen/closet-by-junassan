@@ -7,6 +7,9 @@ import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
 import WishlistButton from "./WishlistButton";
 import SizeGuideModal from "./SizeGuideModal";
+import CompareButton from "./CompareButton";
+import SaleCountdown from "./SaleCountdown";
+import LoyaltyEarn from "./LoyaltyEarn";
 import Accordion from "@/components/ui/Accordion";
 import { useRecent } from "@/lib/recent-store";
 import { toast } from "@/components/ui/Toaster";
@@ -139,11 +142,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
       <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
 
+      {!soldOut && (product.tags.includes("limited") || discount >= 40) && (
+        <SaleCountdown percentOff={discount > 0 ? discount : undefined} />
+      )}
+
       {soldOut ? (
         <RestockNotify productName={product.name} />
       ) : (
         <AddToCartButton product={product} selectedSize={selectedSize} />
       )}
+
+      {!soldOut && <LoyaltyEarn price={product.price_pkr} />}
 
       <div className="flex items-center gap-2">
         <a
@@ -175,6 +184,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <Share2 className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      <CompareButton productId={product.id} productName={product.name} />
 
       <StickyBuyBar product={product} selectedSize={selectedSize} />
 
