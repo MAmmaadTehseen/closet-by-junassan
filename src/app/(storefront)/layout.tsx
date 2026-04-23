@@ -15,7 +15,7 @@ export default async function StorefrontLayout({
   ]);
   return (
     <>
-      <Header categories={categories} />
+      <Header />
       <main className="flex-1">{children}</main>
       <Footer categories={categories} />
       <ClientShell products={products} />

@@ -21,7 +21,7 @@ export default function NotFound() {
           Go Home
         </Link>
         <Link
-          href="/shop"
+          href="/collections/all"
           className="rounded-full border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-ink hover:bg-ink hover:text-paper"
         >
           Browse Shop

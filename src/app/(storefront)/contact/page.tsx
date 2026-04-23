@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { MessageCircle, Mail, Phone } from "lucide-react";
-import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
+import { Mail, Phone, Music2 } from "lucide-react";
+import { InstagramIcon, FacebookIcon, WhatsAppIcon } from "@/components/ui/brand-icons";
 import Accordion from "@/components/ui/Accordion";
 import { siteConfig, waLink, telLink } from "@/lib/site-config";
 
@@ -55,7 +55,7 @@ export default function ContactPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <ContactCard
             href={waLink()}
-            icon={<MessageCircle className="h-5 w-5" />}
+            icon={<WhatsAppIcon className="h-6 w-6" />}
             title="WhatsApp"
             copy="Chat with us instantly"
             external
@@ -91,7 +91,7 @@ export default function ContactPage() {
           />
           <ContactCard
             href={siteConfig.socials.tiktok}
-            icon={<MessageCircle className="h-5 w-5" />}
+            icon={<Music2 className="h-5 w-5" />}
             title="TikTok"
             copy="@closetbyjunassan"
             external

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { HandCoins, MessageCircle } from "lucide-react";
+import { HandCoins } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/brand-icons";
 import Modal from "@/components/ui/Modal";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { formatPKR } from "@/lib/format";
@@ -135,7 +136,7 @@ export default function MakeOffer({ product }: { product: Product }) {
                   onClick={() => setOpen(false)}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-paper transition hover:opacity-90"
                 >
-                  <MessageCircle className="h-4 w-4" /> Send offer on WhatsApp
+                  <WhatsAppIcon mono className="h-4 w-4" /> Send offer on WhatsApp
                 </a>
               </MagneticButton>
               <p className="mt-3 text-center text-[10px] text-muted-foreground">

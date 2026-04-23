@@ -11,7 +11,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
           Try clearing a filter or exploring a different category.
         </p>
         <Link
-          href="/shop"
+          href="/collections/all"
           className="mt-2 rounded-full bg-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper"
         >
           Browse all

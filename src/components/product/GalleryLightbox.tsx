@@ -33,6 +33,7 @@ export default function GalleryLightbox({
     };
   }, [images.length, onClose]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setZoom(1);
     setPos({ x: 50, y: 50 });
@@ -56,7 +57,14 @@ export default function GalleryLightbox({
 
   return (
     <div className="fade-in fixed inset-0 z-[100] flex flex-col bg-black/95">
-      <div className="flex items-center justify-between px-4 py-3 text-white">
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white text-ink shadow-lg transition hover:scale-105 hover:bg-white/90 focus-ring sm:right-6 sm:top-6 sm:h-12 sm:w-12"
+      >
+        <X className="h-5 w-5 sm:h-6 sm:w-6" />
+      </button>
+      <div className="flex items-center justify-between px-4 py-3 pr-20 text-white sm:pr-24">
         <span className="text-xs font-semibold uppercase tracking-widest">
           {idx + 1} / {images.length}
         </span>
@@ -77,13 +85,6 @@ export default function GalleryLightbox({
             disabled={zoom === 4}
           >
             <ZoomIn className="h-4 w-4" />
-          </button>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="ml-2 rounded-full p-2 hover:bg-white/10"
-          >
-            <X className="h-5 w-5" />
           </button>
         </div>
       </div>

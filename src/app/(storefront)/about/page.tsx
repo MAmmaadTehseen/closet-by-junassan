@@ -96,7 +96,7 @@ export default function AboutPage() {
           </h2>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
-              href="/shop"
+              href="/collections/all"
               className="rounded-full bg-ink px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper hover:opacity-90"
             >
               Shop the Drop

@@ -37,6 +37,17 @@ export const siteConfig = {
     "3-day easy returns",
     "Pay when it arrives",
   ],
+
+  brands: [
+    { name: "Nike", slug: "nike" },
+    { name: "Adidas", slug: "adidas" },
+    { name: "Puma", slug: "puma" },
+    { name: "Reebok", slug: "reebok" },
+    { name: "Levi's", slug: "levis" },
+    { name: "Guess", slug: "guess" },
+    { name: "New Balance", slug: "new-balance" },
+    { name: "Under Armour", slug: "under-armour" },
+  ],
 } as const;
 
 export const waLink = (msg = "Hi! I'd like to ask about a product."): string =>

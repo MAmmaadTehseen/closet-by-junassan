@@ -27,7 +27,7 @@ export default function NotFound() {
 
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Link
-            href="/shop"
+            href="/collections/all"
             className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-paper transition hover:opacity-90"
           >
             <Compass className="h-3.5 w-3.5" /> Browse the shop

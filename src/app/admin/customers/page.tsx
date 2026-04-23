@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, MessageCircle } from "lucide-react";
+import { Users } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/brand-icons";
 import { isAdminAuthed } from "@/lib/admin-auth";
 import { hasAdminEnv, createAdminClient } from "@/lib/supabase/admin";
 import { formatPKR } from "@/lib/format";
@@ -159,7 +160,7 @@ export default async function AdminCustomers() {
                             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border hover:border-ink"
                             aria-label="WhatsApp"
                           >
-                            <MessageCircle className="h-3.5 w-3.5" />
+                            <WhatsAppIcon mono className="h-3.5 w-3.5" />
                           </a>
                           <Link
                             href={`/admin/orders?q=${encodeURIComponent(r.phone)}`}

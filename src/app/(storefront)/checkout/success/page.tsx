@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Phone, Package, Truck, MessageCircle, MapPin } from "lucide-react";
-import { InstagramIcon } from "@/components/ui/brand-icons";
+import { Phone, Package, Truck, MapPin } from "lucide-react";
+import { InstagramIcon, WhatsAppIcon } from "@/components/ui/brand-icons";
 import ClearCartOnSuccess from "@/components/checkout/ClearCartOnSuccess";
 import CopyCode from "@/components/checkout/CopyCode";
 import ReferralShare from "@/components/checkout/ReferralShare";
@@ -136,10 +136,10 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:border-ink"
         >
-          <MessageCircle className="h-3.5 w-3.5" /> WhatsApp us
+          <WhatsAppIcon mono className="h-3.5 w-3.5" /> WhatsApp us
         </a>
         <Link
-          href="/shop"
+          href="/collections/all"
           className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90"
         >
           Continue shopping

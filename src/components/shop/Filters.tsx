@@ -4,7 +4,6 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { X } from "lucide-react";
 import { SIZES } from "@/lib/types";
-import type { CategoryDef } from "@/lib/categories";
 
 const PRICE_RANGES = [
   { label: "All", min: "", max: "" },
@@ -14,12 +13,24 @@ const PRICE_RANGES = [
   { label: "3500+", min: "3500", max: "" },
 ];
 
+const GENDERS = [
+  { label: "Men", value: "men" },
+  { label: "Women", value: "women" },
+  { label: "Kids", value: "kids" },
+];
+
+const TYPES = [
+  { label: "Clothing", value: "clothing" },
+  { label: "Shoes", value: "shoes" },
+  { label: "Accessories", value: "accessories" },
+];
+
 export default function Filters({
   compact = false,
-  categories = [],
+  brands = [],
 }: {
   compact?: boolean;
-  categories?: CategoryDef[];
+  brands?: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -27,7 +38,9 @@ export default function Filters({
 
   const current = useMemo(
     () => ({
-      category: params.get("category") ?? "",
+      gender: params.get("gender") ?? "",
+      type: params.get("type") ?? "",
+      brand: params.get("brand") ?? "",
       size: params.get("size") ?? "",
       minPrice: params.get("minPrice") ?? "",
       maxPrice: params.get("maxPrice") ?? "",
@@ -36,7 +49,12 @@ export default function Filters({
   );
 
   const hasAny =
-    current.category || current.size || current.minPrice || current.maxPrice;
+    current.gender ||
+    current.type ||
+    current.brand ||
+    current.size ||
+    current.minPrice ||
+    current.maxPrice;
 
   const update = useCallback(
     (patch: Record<string, string>) => {
@@ -56,11 +74,17 @@ export default function Filters({
     <aside className={`flex flex-col gap-8 text-sm ${compact ? "" : ""}`}>
       {hasAny && (
         <div className="flex flex-wrap gap-2">
-          {current.category && (
+          {current.gender && (
             <ActiveChip
-              label={`Category: ${current.category}`}
-              onClear={() => update({ category: "" })}
+              label={`Gender: ${current.gender}`}
+              onClear={() => update({ gender: "" })}
             />
+          )}
+          {current.type && (
+            <ActiveChip label={`Type: ${current.type}`} onClear={() => update({ type: "" })} />
+          )}
+          {current.brand && (
+            <ActiveChip label={`Brand: ${current.brand}`} onClear={() => update({ brand: "" })} />
           )}
           {current.size && (
             <ActiveChip label={`Size: ${current.size}`} onClear={() => update({ size: "" })} />
@@ -80,31 +104,52 @@ export default function Filters({
         </div>
       )}
 
-      <Section title="Category">
-        <button onClick={() => update({ category: "" })} className={chip(current.category === "")}>
+      <Section title="Gender">
+        <button onClick={() => update({ gender: "" })} className={chip(current.gender === "")}>
           All
         </button>
-        {categories.map((c) => (
+        {GENDERS.map((g) => (
           <button
-            key={c.slug}
-            onClick={() => update({ category: c.slug })}
-            className={chip(current.category === c.slug)}
+            key={g.value}
+            onClick={() => update({ gender: g.value })}
+            className={chip(current.gender === g.value)}
           >
-            {c.label}
+            {g.label}
           </button>
         ))}
       </Section>
 
-      <Section title="Size">
-        <button onClick={() => update({ size: "" })} className={chip(current.size === "")}>
+      <Section title="Type">
+        <button onClick={() => update({ type: "" })} className={chip(current.type === "")}>
           All
         </button>
-        {SIZES.map((s) => (
-          <button key={s} onClick={() => update({ size: s })} className={chip(current.size === s)}>
-            {s}
+        {TYPES.map((t) => (
+          <button
+            key={t.value}
+            onClick={() => update({ type: t.value })}
+            className={chip(current.type === t.value)}
+          >
+            {t.label}
           </button>
         ))}
       </Section>
+
+      {brands.length > 0 && (
+        <Section title="Brand">
+          <button onClick={() => update({ brand: "" })} className={chip(current.brand === "")}>
+            All
+          </button>
+          {brands.map((b) => (
+            <button
+              key={b}
+              onClick={() => update({ brand: b })}
+              className={chip(current.brand === b)}
+            >
+              {b}
+            </button>
+          ))}
+        </Section>
+      )}
 
       <Section title="Price (PKR)">
         {PRICE_RANGES.map((r) => {
@@ -119,6 +164,17 @@ export default function Filters({
             </button>
           );
         })}
+      </Section>
+
+      <Section title="Size">
+        <button onClick={() => update({ size: "" })} className={chip(current.size === "")}>
+          All
+        </button>
+        {SIZES.map((s) => (
+          <button key={s} onClick={() => update({ size: s })} className={chip(current.size === s)}>
+            {s}
+          </button>
+        ))}
       </Section>
     </aside>
   );

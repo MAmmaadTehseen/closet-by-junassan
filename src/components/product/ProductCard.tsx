@@ -9,10 +9,13 @@ import QuickViewButton from "./QuickViewButton";
 export default function ProductCard({
   product,
   priority,
+  variant = "grid",
 }: {
   product: Product;
   priority?: boolean;
+  variant?: "grid" | "carousel";
 }) {
+  const aspectClass = variant === "carousel" ? "aspect-[2/3]" : "aspect-4/5";
   const isLimited = product.tags.includes("limited") || product.stock <= 2;
   const onlyOne = product.stock === 1;
   const isNew = product.tags.includes("new");
@@ -25,7 +28,7 @@ export default function ProductCard({
   return (
     <div className="group relative" data-cursor="View">
       <Link href={`/product/${product.slug}`} className="block focus-ring">
-        <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-cream">
+        <div className={`relative ${aspectClass} w-full overflow-hidden rounded-2xl bg-cream`}>
           {product.images[0] && (
             <Image
               src={product.images[0]}

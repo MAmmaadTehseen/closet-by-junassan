@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 import DevBanner from "@/components/ui/DevBanner";
 import { getLang } from "@/lib/i18n";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+const ceramic = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Ceramic.otf",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-ceramic",
   display: "swap",
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  display: "swap",
+  fallback: ["Georgia", "ui-serif", "serif"],
 });
 
 export const metadata: Metadata = {
@@ -50,9 +51,9 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   manifest: "/manifest.json",
   other: {
-    "theme-color": "#0a0a0a",
+    "theme-color": "#ffffff",
     "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-status-bar-style": "default",
   },
   icons: {
     icon: "/icons/icon.svg",
@@ -73,13 +74,8 @@ export default async function RootLayout({
     description: siteConfig.description,
   };
 
-  const themeBootstrap = `(function(){try{var t=localStorage.getItem('closet-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
-
   return (
-    <html lang={lang} className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
-      </head>
+    <html lang={lang} className={ceramic.variable} suppressHydrationWarning>
       <body className="flex min-h-dvh flex-col bg-background text-foreground">
         <DevBanner />
         {children}

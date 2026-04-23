@@ -103,7 +103,7 @@ export default async function StyleDetail({ params }: { params: Params }) {
 
       <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
         <Link
-          href="/shop"
+          href="/collections/all"
           className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground hover:text-ink"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to shop

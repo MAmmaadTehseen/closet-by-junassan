@@ -39,7 +39,7 @@ export default async function CollectionsIndex() {
             Check back soon — new editorial edits drop weekly.
           </p>
           <Link
-            href="/shop"
+            href="/collections/all"
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper hover:opacity-90"
           >
             Shop all

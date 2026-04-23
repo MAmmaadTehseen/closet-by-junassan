@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Package, Phone, Truck, CheckCircle2, XCircle, Clock, MessageCircle } from "lucide-react";
+import { Package, Phone, Truck, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/brand-icons";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { formatPKR } from "@/lib/format";
 import { getDeliveryWindow } from "@/lib/delivery";
@@ -107,7 +108,7 @@ export default async function TrackPage({ searchParams }: { searchParams: SP }) 
           rel="noopener noreferrer"
           className="mt-6 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-ink"
         >
-          <MessageCircle className="h-3.5 w-3.5" /> Ask us on WhatsApp
+          <WhatsAppIcon mono className="h-3.5 w-3.5" /> Ask us on WhatsApp
         </a>
       </div>
     );
@@ -247,10 +248,10 @@ export default async function TrackPage({ searchParams }: { searchParams: SP }) 
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-ink px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-paper"
         >
-          <MessageCircle className="h-3.5 w-3.5" /> WhatsApp support
+          <WhatsAppIcon mono className="h-3.5 w-3.5" /> WhatsApp support
         </a>
         <Link
-          href="/shop"
+          href="/collections/all"
           className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90"
         >
           <Package className="h-3.5 w-3.5" /> Continue shopping

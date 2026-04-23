@@ -38,7 +38,7 @@ export default function CartView() {
           Browse our latest drops and limited pieces — every item is hand-picked and ships COD.
         </p>
         <Link
-          href="/shop"
+          href="/collections/all"
           className="mt-2 rounded-full bg-ink px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper"
         >
           Shop the Drop

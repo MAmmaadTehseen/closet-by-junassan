@@ -5,14 +5,13 @@ import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Drawer from "@/components/ui/Drawer";
 import Filters from "./Filters";
-import type { CategoryDef } from "@/lib/categories";
 
 export default function MobileFiltersDrawer({
   resultCount,
-  categories = [],
+  brands = [],
 }: {
   resultCount?: number;
-  categories?: CategoryDef[];
+  brands?: string[];
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -40,7 +39,7 @@ export default function MobileFiltersDrawer({
       >
         <div className="flex h-full flex-col">
           <div className="flex-1 overflow-y-auto px-5 py-6">
-            <Filters compact categories={categories} />
+            <Filters compact brands={brands} />
           </div>
           <div className="grid grid-cols-2 gap-3 border-t border-border bg-cream/40 p-4">
             <button

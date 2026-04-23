@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Ruler, MessageCircle } from "lucide-react";
+import { Ruler } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/brand-icons";
 import Modal from "@/components/ui/Modal";
 import { SIZE_CHARTS, type SizeChart } from "@/lib/size-charts";
 import { waLink } from "@/lib/site-config";
@@ -63,7 +64,7 @@ export default function SizeGuideModal({ category }: { category: Category }) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-full border border-ink px-4 py-2 text-xs font-semibold uppercase tracking-widest text-ink transition hover:bg-ink hover:text-paper"
             >
-              <MessageCircle className="h-3 w-3" /> Ask us
+              <WhatsAppIcon mono className="h-3 w-3" /> Ask us
             </a>
           </div>
         </div>

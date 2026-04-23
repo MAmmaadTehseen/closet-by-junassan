@@ -28,7 +28,7 @@ export default function CartDrawer() {
             Limited pieces drop every week. Find something you love.
           </p>
           <Link
-            href="/shop"
+            href="/collections/all"
             onClick={close}
             className="mt-2 rounded-full bg-ink px-6 py-3 text-xs font-semibold uppercase tracking-widest text-paper"
           >

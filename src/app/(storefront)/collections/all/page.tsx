@@ -7,18 +7,20 @@ import MobileFiltersDrawer from "@/components/shop/MobileFiltersDrawer";
 import FilterPills from "@/components/shop/FilterPills";
 import ProductGrid from "@/components/product/ProductGrid";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
-import { fetchProducts } from "@/lib/products";
-import { fetchCategories } from "@/lib/categories";
+import { fetchProducts, fetchDistinctBrands } from "@/lib/products";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Shop All",
-  description: "Browse all thrift finds — clothing, shoes, and bags at affordable prices.",
+  title: "Collections",
+  description:
+    "Browse the full collection — clothing, shoes, and accessories from the brands you love.",
 };
 
 type SP = Promise<{
-  category?: string;
+  gender?: string;
+  type?: string;
+  brand?: string;
   size?: string;
   minPrice?: string;
   maxPrice?: string;
@@ -26,9 +28,11 @@ type SP = Promise<{
   q?: string;
 }>;
 
-async function ShopResults({ sp }: { sp: Awaited<SP> }) {
+async function CollectionsResults({ sp }: { sp: Awaited<SP> }) {
   const products = await fetchProducts({
-    category: sp.category || undefined,
+    gender: sp.gender || undefined,
+    type: sp.type || undefined,
+    brand: sp.brand || undefined,
     size: sp.size,
     minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
     maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
@@ -44,7 +48,7 @@ async function ShopResults({ sp }: { sp: Awaited<SP> }) {
           Try adjusting your filters or searching for something different.
         </p>
         <Link
-          href="/shop"
+          href="/collections/all"
           className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90"
         >
           Clear all filters
@@ -56,27 +60,41 @@ async function ShopResults({ sp }: { sp: Awaited<SP> }) {
   return <ProductGrid products={products} />;
 }
 
-export default async function ShopPage({ searchParams }: { searchParams: SP }) {
+export default async function CollectionsAllPage({
+  searchParams,
+}: {
+  searchParams: SP;
+}) {
   const sp = await searchParams;
 
-  const [allForCount, categories] = await Promise.all([
+  const [allForCount, brands] = await Promise.all([
     fetchProducts({
-      category: sp.category || undefined,
+      gender: sp.gender || undefined,
+      type: sp.type || undefined,
+      brand: sp.brand || undefined,
       size: sp.size,
       minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
       maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
       sort: "newest",
       q: sp.q,
     }),
-    fetchCategories(),
+    fetchDistinctBrands(),
   ]);
   const count = allForCount.length;
-  const isFiltered = !!(sp.category || sp.size || sp.minPrice || sp.maxPrice || sp.q);
+  const isFiltered = !!(
+    sp.gender ||
+    sp.type ||
+    sp.brand ||
+    sp.size ||
+    sp.minPrice ||
+    sp.maxPrice ||
+    sp.q
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
       <div className="mb-10">
-        <p className="eyebrow mb-2">Everything in one place</p>
+        <p className="eyebrow mb-2">The Collections</p>
         <h1 className="font-display text-4xl font-semibold leading-tight sm:text-6xl">
           Shop All
         </h1>
@@ -89,24 +107,23 @@ export default async function ShopPage({ searchParams }: { searchParams: SP }) {
       </div>
 
       <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-paper p-3 sm:rounded-full sm:px-5">
-        <MobileFiltersDrawer resultCount={count} categories={categories} />
+        <MobileFiltersDrawer resultCount={count} brands={brands} />
         <p className="hidden text-xs uppercase tracking-widest text-muted-foreground lg:inline">
           {count} {count === 1 ? "result" : "results"}
         </p>
         <SortSelect />
       </div>
 
-      {/* Active filter pills (client component, reads URL params) */}
       <Suspense fallback={null}>
         <FilterPills />
       </Suspense>
 
       <div className="grid gap-10 lg:grid-cols-[240px_1fr]">
         <div className="hidden lg:block">
-          <Filters categories={categories} />
+          <Filters brands={brands} />
         </div>
         <Suspense fallback={<ProductGridSkeleton count={12} />}>
-          <ShopResults sp={sp} />
+          <CollectionsResults sp={sp} />
         </Suspense>
       </div>
     </div>

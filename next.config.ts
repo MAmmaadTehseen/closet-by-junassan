@@ -41,6 +41,12 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      { source: "/shop", destination: "/collections/all", permanent: true },
+      { source: "/shop/:path*", destination: "/collections/all/:path*", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

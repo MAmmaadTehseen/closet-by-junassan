@@ -32,7 +32,7 @@ export default function WishlistView({ allProducts }: { allProducts: Product[] }
           Tap the heart on any product to save it here. Limited pieces sell fast.
         </p>
         <Link
-          href="/shop"
+          href="/collections/all"
           className="mt-2 rounded-full bg-ink px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper"
         >
           Browse the Drop

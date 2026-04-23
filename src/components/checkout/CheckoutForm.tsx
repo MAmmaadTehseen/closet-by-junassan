@@ -66,7 +66,7 @@ export default function CheckoutForm() {
       <div className="py-20 text-center">
         <p className="text-muted-foreground">
           Your bag is empty.{" "}
-          <Link className="underline" href="/shop">
+          <Link className="underline" href="/collections/all">
             Browse products
           </Link>
           .

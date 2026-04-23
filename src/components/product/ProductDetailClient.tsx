@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Share2, Copy, Check, MessageCircle, Eye } from "lucide-react";
+import { Share2, Copy, Check, Eye } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/brand-icons";
 import AddToCartButton from "./AddToCartButton";
 import RestockNotify from "./RestockNotify";
 import StickyBuyBar from "./StickyBuyBar";
@@ -168,7 +169,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           rel="noopener noreferrer"
           className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-border px-4 py-3 text-xs font-semibold uppercase tracking-widest text-ink transition hover:border-ink"
         >
-          <MessageCircle className="h-3.5 w-3.5" /> Ask on WhatsApp
+          <WhatsAppIcon mono className="h-3.5 w-3.5" /> Ask on WhatsApp
         </a>
         <button
           onClick={onCopy}

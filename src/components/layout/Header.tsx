@@ -3,27 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, ShoppingBag, X, Search, Heart } from "lucide-react";
+import { Menu, ShoppingBag, X, Search, Heart, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { useUi } from "@/lib/ui-store";
 import { siteConfig } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
-import ThemeToggle from "@/components/ui/ThemeToggle";
 import LangToggle from "@/components/layout/LangToggle";
-import type { CategoryDef } from "@/lib/categories";
+import MegaMenu, { MEGA_MENU } from "@/components/layout/MegaMenu";
 
-export default function Header({ categories = [] }: { categories?: CategoryDef[] }) {
-  const NAV_LINKS = [
-    { href: "/shop", label: "Shop" },
-    ...categories.map((c) => ({ href: `/category/${c.slug}`, label: c.label })),
-    { href: "/collections", label: "Collections" },
-    { href: "/deals", label: "Deals" },
-  ];
+export default function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const cartCount = useCart((s) => s.items.reduce((n, i) => n + i.quantity, 0));
   const wishCount = useWishlist((s) => s.ids.length);
   const openCart = useUi((s) => s.openCart);
@@ -35,15 +29,13 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
   }, [open]);
-
-  // Hide mobile menu on route change.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setOpen(false), [pathname]);
 
   return (
     <header className="sticky top-0 z-40 w-full">
       <AnnouncementBar />
-      <div className="progressive-blur border-b border-border">
+      <div className="relative border-b border-border bg-paper">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button
@@ -61,28 +53,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium lg:flex">
-            {NAV_LINKS.map((link) => {
-              const active =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname === link.href || pathname.startsWith(link.href + "/");
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative py-1 transition ${
-                    active ? "text-ink" : "text-ink/70 hover:text-ink"
-                  }`}
-                >
-                  {link.label}
-                  {active && (
-                    <span className="absolute -bottom-0.5 left-0 right-0 h-px bg-ink" />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+          <MegaMenu />
 
           <div className="flex items-center gap-1">
             <button
@@ -93,7 +64,6 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
               <Search className="h-5 w-5" />
             </button>
             <LangToggle />
-            <ThemeToggle />
             <Link
               href="/wishlist"
               className="relative hidden rounded-full p-2.5 text-ink hover:bg-cream focus-ring sm:inline-flex"
@@ -129,7 +99,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
             className="absolute inset-0 bg-ink/50 fade-in"
             onClick={() => setOpen(false)}
           />
-          <div className="drawer-in absolute left-0 top-0 h-full w-[86%] max-w-sm bg-paper p-6 shadow-2xl">
+          <div className="drawer-in absolute left-0 top-0 h-full w-[86%] max-w-sm overflow-y-auto bg-paper p-6 shadow-2xl">
             <div className="mb-8 flex items-center justify-between">
               <Link
                 href="/"
@@ -147,23 +117,53 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
               </button>
             </div>
             <nav className="flex flex-col">
-              <Link
-                href="/"
-                onClick={() => setOpen(false)}
-                className="border-b border-border py-4 text-base font-medium"
-              >
-                Home
-              </Link>
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="border-b border-border py-4 text-base font-medium"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {MEGA_MENU.map((item) => {
+                if (!item.panel) {
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="border-b border-border py-4 text-base font-medium uppercase tracking-[0.12em]"
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                }
+                const expanded = mobileExpanded === item.label;
+                return (
+                  <div key={item.label} className="border-b border-border">
+                    <button
+                      className="flex w-full items-center justify-between py-4 text-left text-base font-medium uppercase tracking-[0.12em] focus-ring"
+                      onClick={() =>
+                        setMobileExpanded(expanded ? null : item.label)
+                      }
+                      aria-expanded={expanded}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          expanded ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    {expanded && (
+                      <div className="pb-4 pl-2">
+                        {item.panel.map((s) => (
+                          <Link
+                            key={s.href}
+                            href={s.href}
+                            onClick={() => setOpen(false)}
+                            className="block py-2 text-sm text-ink/80 hover:text-ink"
+                          >
+                            {s.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
               <Link
                 href="/wishlist"
                 onClick={() => setOpen(false)}
@@ -176,7 +176,7 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
                 onClick={() => setOpen(false)}
                 className="border-b border-border py-4 text-base font-medium"
               >
-                My Closet · Orders & Coins
+                My Orders
               </Link>
               <Link
                 href="/about"

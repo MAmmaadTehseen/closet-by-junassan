@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { siteConfig, waLink } from "@/lib/site-config";
-import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
-import { MessageCircle } from "lucide-react";
+import { InstagramIcon, FacebookIcon, WhatsAppIcon } from "@/components/ui/brand-icons";
 import type { CategoryDef } from "@/lib/categories";
 
 export default function Footer({ categories = [] }: { categories?: CategoryDef[] }) {
@@ -20,9 +19,9 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                 href={waLink()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-ink bg-ink px-4 py-2 text-xs font-semibold uppercase tracking-wide text-paper transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] py-2 pl-2 pr-4 text-xs font-semibold uppercase tracking-wide text-white transition hover:opacity-90"
               >
-                <MessageCircle className="h-3.5 w-3.5" /> WhatsApp Us
+                <WhatsAppIcon className="h-5 w-5" /> WhatsApp Us
               </a>
               <a
                 href={siteConfig.socials.instagram}
@@ -61,8 +60,13 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                 </Link>
               </li>
               <li>
-                <Link className="text-ink/80 hover:text-ink" href="/shop">
+                <Link className="text-ink/80 hover:text-ink" href="/collections/all">
                   All Products
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/accessories">
+                  Accessories
                 </Link>
               </li>
             </ul>
