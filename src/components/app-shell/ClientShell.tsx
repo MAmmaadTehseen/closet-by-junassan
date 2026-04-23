@@ -16,6 +16,9 @@ const SocialProof = dynamic(() => import("@/components/ui/SocialProof"), {
 const ExitIntent = dynamic(() => import("@/components/ui/ExitIntent"), {
   ssr: false,
 });
+const CompareBar = dynamic(() => import("@/components/product/CompareBar"), {
+  ssr: false,
+});
 
 export default function ClientShell({ products }: { products: Product[] }) {
   return (
@@ -27,6 +30,7 @@ export default function ClientShell({ products }: { products: Product[] }) {
       <BackToTop />
       <SocialProof />
       <ExitIntent />
+      <CompareBar products={products} />
     </>
   );
 }

@@ -10,7 +10,7 @@ export default async function StorefrontLayout({
   children: React.ReactNode;
 }) {
   const [products, categories] = await Promise.all([
-    fetchProducts({ limit: 60 }),
+    fetchProducts({ limit: 400 }),
     fetchCategories(),
   ]);
   return (

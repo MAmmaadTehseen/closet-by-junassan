@@ -8,7 +8,7 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
   return (
     <footer className="mt-20 border-t border-border bg-cream/50">
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-8 sm:px-6">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div>
             <h3 className="font-display text-2xl font-semibold">{siteConfig.name}</h3>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -61,10 +61,39 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
                 </Link>
               </li>
               <li>
+                <Link className="text-ink/80 hover:text-ink" href="/bundles">
+                  Bundles
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/brands">
+                  Brands A–Z
+                </Link>
+              </li>
+              <li>
+                <Link className="text-ink/80 hover:text-ink" href="/gift-cards">
+                  Gift Cards
+                </Link>
+              </li>
+              <li>
                 <Link className="text-ink/80 hover:text-ink" href="/shop">
                   All Products
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="eyebrow">Discover</p>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              <li><Link className="text-ink/80 hover:text-ink" href="/lookbook">Lookbook</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/journal">Journal</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/style-quiz">Style Quiz</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/fit-finder">Fit Finder</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/compare">Compare</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/rewards">Closet Club</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/refer">Refer &amp; Earn</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/sustainability">Our Impact</Link></li>
             </ul>
           </div>
 
@@ -74,7 +103,8 @@ export default function Footer({ categories = [] }: { categories?: CategoryDef[]
               <li><Link className="text-ink/80 hover:text-ink" href="/about">About</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/contact">Contact</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/contact#faq">FAQ</Link></li>
-              <li><Link className="text-ink/80 hover:text-ink" href="/contact">Returns & Sizing</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/size-guide">Size Guide</Link></li>
+              <li><Link className="text-ink/80 hover:text-ink" href="/delivery">Delivery Estimator</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/track">Track Order</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/privacy">Privacy Policy</Link></li>
               <li><Link className="text-ink/80 hover:text-ink" href="/terms">Terms</Link></li>

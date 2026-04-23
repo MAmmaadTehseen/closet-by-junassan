@@ -11,6 +11,7 @@ import { siteConfig } from "@/lib/site-config";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/brand-icons";
 import AnnouncementBar from "@/components/home/AnnouncementBar";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import CurrencySwitcher from "@/components/ui/CurrencySwitcher";
 import type { CategoryDef } from "@/lib/categories";
 
 export default function Header({ categories = [] }: { categories?: CategoryDef[] }) {
@@ -91,6 +92,9 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
               <Search className="h-5 w-5" />
             </button>
             <ThemeToggle />
+            <div className="hidden sm:inline-flex">
+              <CurrencySwitcher />
+            </div>
             <Link
               href="/wishlist"
               className="relative hidden rounded-full p-2.5 text-ink hover:bg-cream focus-ring sm:inline-flex"
@@ -169,6 +173,41 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
                 <Heart className="h-4 w-4" /> Wishlist
               </Link>
               <Link
+                href="/bundles"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Bundles
+              </Link>
+              <Link
+                href="/lookbook"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Lookbook
+              </Link>
+              <Link
+                href="/journal"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Journal
+              </Link>
+              <Link
+                href="/rewards"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Closet Club
+              </Link>
+              <Link
+                href="/gift-cards"
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 text-base font-medium"
+              >
+                Gift Cards
+              </Link>
+              <Link
                 href="/about"
                 onClick={() => setOpen(false)}
                 className="border-b border-border py-4 text-base font-medium"
@@ -183,6 +222,9 @@ export default function Header({ categories = [] }: { categories?: CategoryDef[]
                 Contact
               </Link>
             </nav>
+            <div className="mt-6">
+              <CurrencySwitcher compact />
+            </div>
             <div className="mt-8 flex gap-3">
               <a
                 href={siteConfig.socials.instagram}
