@@ -42,6 +42,14 @@ Concrete, codebase-grounded ideas. Each is scoped small enough to land in a focu
 
 ## Performance
 
-15. **Image-format-aware hero poster** — `VideoHero.tsx` hard-codes `/videos/hero-poster.jpg`. For the slow-connection / `prefers-reduced-motion` path this is the actual LCP image on mobile. Serve AVIF/WebP via `next/image` (with the mp4 staying as-is) instead of a raw `<video poster>`. Rationale: hero poster is the single biggest image on first load; AVIF typically halves it.
+15. ~~**Image-format-aware hero poster**~~ — obsolete. `VideoHero.tsx` was retired in `feat/hero-cursor-lenis-i18n` in favor of `HeroEditorial`, which has no video asset / poster.
 
 16. **Defer `SocialProof` + `ExitIntent` + `CursorCompanion` behind `requestIdleCallback`** — `ClientShell.tsx` already uses `next/dynamic({ ssr: false })` which ships the JS at hydrate time. These components don't need to be ready for several seconds. Wrap mounts in `requestIdleCallback` (with a `setTimeout` fallback) to push their JS parse cost off the interactive window. Rationale: these are "delight" features; none of them should contend with the main thread during the user's first scroll. _(in PR: claude/auto-20260423-0845 — landed via new `IdleMount` wrapper in `src/components/app-shell/IdleMount.tsx`)_
+
+## i18n follow-ups
+
+17. **Translate `MegaMenu` sub-panel labels** — `feat/hero-cursor-lenis-i18n` translated the 5 top-level MEGA_MENU items (Men/Women/Shoes/Collections/Deals) but left the 13 sub-panel labels (Clothing / Shoes / Sale / Activewear / Accessories / Mens / Womens / Kids …) in English. Add `nav.sub.*` keys to `DICT` and consume them via `labelKey` on the sub-link items. Rationale: second biggest visible-to-user English surface after the pass, and mechanically trivial once the top level is done.
+
+18. **Translate `CheckoutForm` field labels + validation messages** — `src/components/checkout/CheckoutForm.tsx` (~420 lines, client) still has English labels/placeholders/inline errors. Add a `checkout.form.*` key set and a small `useT()` refactor. Rationale: the eyebrow + title are translated but the form underneath isn't, which will look half-done to any Urdu-reading buyer.
+
+19. **Translate server-action error returns** — mutations in `lib/admin-actions.ts` / `lib/order-actions.ts` / similar return `{ ok: false, error: "..." }` with English strings that surface as toasts. Pass a `lang` arg or move to a key-based error shape so the toaster can render the right language. Rationale: happy-path is translated; error path silently reverts to English, which is exactly when the user most needs legibility.

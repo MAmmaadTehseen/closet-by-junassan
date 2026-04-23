@@ -3,7 +3,8 @@ import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 import DevBanner from "@/components/ui/DevBanner";
-import { getLang } from "@/lib/i18n";
+import I18nProvider from "@/components/app-shell/I18nProvider";
+import { getLang } from "@/lib/i18n-server";
 
 // Ceramic (donationware) is license-restricted for commercial use; Playfair Display
 // is the free-for-commercial Google Font stand-in. The CSS variable keeps the
@@ -74,12 +75,14 @@ export default async function RootLayout({
   return (
     <html lang={lang} className={ceramic.variable} suppressHydrationWarning>
       <body className="flex min-h-dvh flex-col bg-background text-foreground">
-        <DevBanner />
-        {children}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
-        />
+        <I18nProvider lang={lang}>
+          <DevBanner />
+          {children}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+          />
+        </I18nProvider>
       </body>
     </html>
   );

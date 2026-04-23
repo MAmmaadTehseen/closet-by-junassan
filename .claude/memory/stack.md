@@ -27,6 +27,7 @@
 | `server-only` | ^0.0.1 | poison-pill import in `supabase/admin.ts` so service key can't leak to the client |
 | `tailwindcss` + `@tailwindcss/postcss` | ^4 | styling; zero config beyond `postcss.config.mjs` |
 | `eslint` + `eslint-config-next` | ^9 / 16.2.3 | lint, flat config in `eslint.config.mjs` |
+| `lenis` | ^1.3.23 | interpolated wheel/touch smooth scroll; initialized in `LenisProvider.tsx`, disabled on `prefers-reduced-motion` |
 
 No test framework is installed. No Jest/Vitest/Playwright. CI runs `next build` via `vercel-build` which first runs migrations.
 
@@ -68,6 +69,7 @@ Rule: **new schema changes must be a new numbered file** (next is `0022_*.sql`).
 - **Zustand**: always `"use client"` at top of the store file and any component reading it. Persisted stores use `persist` with a stable `name`.
 - **Accessibility**: `.focus-ring` class is the standard outline treatment; use it on interactive elements. `suppressHydrationWarning` is on `<html>` because `LangToggle` / `DevBanner` can differ SSR vs client.
 - **PKR**: always render via `formatPKR()` (thousands separator + "Rs" prefix). Never string-concatenate prices.
+- **i18n**: `src/lib/i18n.ts` is the pure, client-safe module (types, `DICT`, sync `t(key, lang, vars)` with `{var}` interpolation). Server-only helpers live in `src/lib/i18n-server.ts` (`getLang()`, `getT()`) behind `import "server-only"`. **RSCs** `await getT()` and render translated strings directly. **Client components** consume `useT()` from `@/hooks/use-t`, which reads the `I18nProvider` context mounted in `src/app/layout.tsx`. The language cookie (`closet-lang`, `en` | `ur`) is set by `LangToggle.tsx` which calls `router.refresh()` so RSCs re-render with the new `lang`, which re-renders the provider, which updates every client `useT()` consumer. New customer-facing strings go into `DICT`; admin UI is intentionally English-only.
 - **Phones**: validated as `^03[0-9]{9}$` and **normalized** to that shape before DB writes — see `validators.ts::normalizePhone` and `loyalty.ts::normalizePhoneKey`.
 
 ## Security posture

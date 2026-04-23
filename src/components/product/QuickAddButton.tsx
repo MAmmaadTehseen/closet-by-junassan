@@ -7,6 +7,7 @@ import { useUi } from "@/lib/ui-store";
 import { toast } from "@/components/ui/Toaster";
 import { flyToCart } from "@/lib/fly-to-cart";
 import type { Product } from "@/lib/types";
+import { useT } from "@/hooks/use-t";
 
 export default function QuickAddButton({
   product,
@@ -20,6 +21,7 @@ export default function QuickAddButton({
   const flashCartItem = useUi((s) => s.flashCartItem);
   const [done, setDone] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
+  const t = useT();
   const soldOut = product.stock === 0;
 
   const onClick = (e: React.MouseEvent) => {
@@ -41,7 +43,7 @@ export default function QuickAddButton({
     });
     flashCartItem(product.id);
     setDone(true);
-    toast.success(`Added to bag — ${product.name}`);
+    toast.success(t("product.added_toast", { name: product.name }));
     openCart();
     setTimeout(() => setDone(false), 1400);
   };
@@ -51,7 +53,7 @@ export default function QuickAddButton({
       ref={btnRef}
       onClick={onClick}
       disabled={soldOut}
-      aria-label={soldOut ? "Sold out" : `Add ${product.name} to bag`}
+      aria-label={soldOut ? t("product.sold_out") : t("product.quick_add_aria", { name: product.name })}
       className={`flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper shadow-md transition hover:scale-105 disabled:bg-cream disabled:text-muted-foreground ${className}`}
     >
       {done ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}

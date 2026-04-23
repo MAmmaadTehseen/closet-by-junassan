@@ -9,6 +9,7 @@ import { siteConfig, waLink } from "@/lib/site-config";
 import { getDeliveryWindow } from "@/lib/delivery";
 import { hasAdminEnv, createAdminClient } from "@/lib/supabase/admin";
 import { ensureReferralCode } from "@/lib/referrals";
+import { getT } from "@/lib/i18n-server";
 
 export const metadata: Metadata = {
   title: "Order Placed",
@@ -18,27 +19,28 @@ export const metadata: Metadata = {
 
 type SP = Promise<{ o?: string }>;
 
-const NEXT_STEPS = [
-  {
-    icon: <Phone className="h-5 w-5" />,
-    title: "We call to confirm",
-    desc: "Our team calls within 24 hours to verify your order and address.",
-  },
-  {
-    icon: <Package className="h-5 w-5" />,
-    title: "We pack your order",
-    desc: "Every piece is inspected and carefully packed before dispatch.",
-  },
-  {
-    icon: <Truck className="h-5 w-5" />,
-    title: "We deliver to you",
-    desc: `Est. delivery ${getDeliveryWindow()}. Pay in cash when it arrives.`,
-  },
-];
-
 export default async function CheckoutSuccessPage({ searchParams }: { searchParams: SP }) {
   const { o } = await searchParams;
   const code = o && /^CBJ-[A-Z0-9]+$/.test(o) ? o : null;
+  const t = await getT();
+
+  const NEXT_STEPS = [
+    {
+      icon: <Phone className="h-5 w-5" />,
+      title: t("checkout.step1_title"),
+      desc: t("checkout.step1_body"),
+    },
+    {
+      icon: <Package className="h-5 w-5" />,
+      title: t("checkout.step2_title"),
+      desc: t("checkout.step2_body"),
+    },
+    {
+      icon: <Truck className="h-5 w-5" />,
+      title: t("checkout.step3_title"),
+      desc: `${t("checkout.step3_body_prefix")}${getDeliveryWindow()}${t("checkout.step3_body_suffix")}`,
+    },
+  ];
 
   // Look up or create the referral code for this buyer.
   let referralCode: string | null = null;
@@ -85,12 +87,12 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
 
       {/* Headline */}
       <div className="mt-6 text-center">
-        <p className="eyebrow">Order confirmed</p>
+        <p className="eyebrow">{t("checkout.success_eyebrow")}</p>
         <h1 className="mt-3 font-display text-3xl font-semibold leading-tight sm:text-4xl">
-          Your order is on its way.
+          {t("checkout.success_title")}
         </h1>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Thank you for shopping with {siteConfig.shortName}. We&apos;ll take it from here.
+          {t("checkout.success_body", { shop: siteConfig.shortName })}
         </p>
       </div>
 
@@ -98,13 +100,13 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
       {code && (
         <div className="mt-6 flex flex-col items-center gap-1.5">
           <CopyCode code={code} />
-          <p className="text-[11px] text-muted-foreground">Tap to copy your order code</p>
+          <p className="text-[11px] text-muted-foreground">{t("checkout.success_copy_hint")}</p>
         </div>
       )}
 
       {/* What happens next */}
       <div className="mt-10">
-        <p className="eyebrow mb-5 text-center">What happens next</p>
+        <p className="eyebrow mb-5 text-center">{t("checkout.next_steps")}</p>
         <ol className="space-y-3">
           {NEXT_STEPS.map((step, i) => (
             <li key={i} className="flex items-start gap-4 rounded-2xl border border-border bg-paper p-5">
@@ -127,7 +129,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
             href={`/track?code=${code}`}
             className="inline-flex items-center gap-2 rounded-full border border-ink px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-paper"
           >
-            <MapPin className="h-3.5 w-3.5" /> Track order
+            <MapPin className="h-3.5 w-3.5" /> {t("checkout.track_order")}
           </Link>
         )}
         <a
@@ -136,13 +138,13 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:border-ink"
         >
-          <WhatsAppIcon mono className="h-3.5 w-3.5" /> WhatsApp us
+          <WhatsAppIcon mono className="h-3.5 w-3.5" /> {t("checkout.whatsapp_us")}
         </a>
         <Link
           href="/collections/all"
           className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-paper transition hover:opacity-90"
         >
-          Continue shopping
+          {t("checkout.continue_shopping")}
         </Link>
       </div>
 
@@ -156,7 +158,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
         rel="noopener noreferrer"
         className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-ink"
       >
-        <InstagramIcon className="h-3.5 w-3.5" /> Tag us @closetbyjunassan
+        <InstagramIcon className="h-3.5 w-3.5" /> {t("checkout.tag_us")}
       </a>
     </div>
   );
