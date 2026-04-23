@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 import DevBanner from "@/components/ui/DevBanner";
 import { getLang } from "@/lib/i18n";
 
-const ceramic = localFont({
-  src: [
-    {
-      path: "../../public/fonts/Ceramic.otf",
-      weight: "400",
-      style: "normal",
-    },
-  ],
+// Ceramic (donationware) is license-restricted for commercial use; Playfair Display
+// is the free-for-commercial Google Font stand-in. The CSS variable keeps the
+// `--font-ceramic` name so swapping back in a licensed Ceramic is a one-file change.
+const ceramic = Playfair_Display({
+  subsets: ["latin"],
   variable: "--font-ceramic",
   display: "swap",
   fallback: ["Georgia", "ui-serif", "serif"],
