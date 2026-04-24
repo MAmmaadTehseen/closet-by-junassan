@@ -47,6 +47,10 @@ The i18n module had to be callable from both RSCs and client components, but the
 
 _Ideas that were considered and turned down, with why — so we don't re-debate them._
 
+### 2026-04-24 — Don't ship a particle/garment-silhouette variant of HeroSpotlight
+
+An earlier iteration of `HeroSpotlight` replaced the two-blob cursor spotlight with a field of 40 particles (dots + rings) plus eight large `lucide-react` garment icons (shirt / bag / shoes / hanger) drifting with their own physics and a cursor-repel force. It was uncommitted on `dev` when the brand owner called it out as "not so good": the garment icons read as catalog clutter rather than an editorial signature, the repel force felt jittery, and the rAF hot path ran `Math.random()` at render (causing SSR/client hydration mismatches). It was rolled back to the three-orb spotlight (sand/ink/accent-red on slow Lissajous paths, lerped cursor parallax, `mix-blend-mode: multiply` on the foreground orbs) — that is, the direction already committed in the prior 2026-04-24 entry "Editorial hero with a cursor-spotlight signature". **Do not reintroduce garment silhouettes or particle fields into the hero background.** If the hero needs another motion layer, do it as an additional soft-blurred gradient layer inside `HeroSpotlight`, not as foreground iconography.
+
 ### 2026-04-24 — Don't ship the donationware "Ceramic" font
 
 The original design used "Ceramic" (Wino S Kadir / weknow Design, distributed on DaFont). It's **donationware: free for personal use only; commercial use requires contacting the author for a paid license**. Closet by Junassan is a commercial COD storefront, so bundling `Ceramic.otf` in the repo and serving it to every visitor would be a license violation. We rejected (a) committing the donationware file anyway and (b) paying for a commercial Ceramic license at this stage, in favor of a free-for-commercial Google Font (Playfair Display). If the brand later wants the exact Ceramic glyphs enough to justify the license fee, the swap-back procedure lives in `public/fonts/README.txt`.

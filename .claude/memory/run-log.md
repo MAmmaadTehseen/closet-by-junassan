@@ -17,6 +17,16 @@ Format:
 
 ---
 
+## 2026-04-24 — feat/hero-spotlight-orbs
+
+- Goal: Replace the 40-particle + garment-silhouette HeroSpotlight (uncommitted WIP on dev that the user flagged as "not so good") with the editorial two-blob spotlight that `decisions.md` 2026-04-24 actually specified, taking design cues from Antigravity: slow autonomous drift that works with no cursor, cinematic parallax lerp when the cursor is over the hero.
+- Changed:
+  - `src/components/home/HeroSpotlight.tsx` — full rewrite. Three radial-gradient orbs (sand back / ink mid with `mix-blend-mode: multiply` / accent-red front with `multiply`), each on its own slow Lissajous path (`Math.sin`/`Math.cos` with mismatched ωx/ωy per orb so paths never visibly loop). Single rAF mutates three `transform: translate3d(%, %, 0)` strings per frame on wrapper divs sized `inset: 0` (so translate percentages resolve against the container, not the orb itself — the prior particle code's silent bug). Cursor position is lerped at 0.06/frame toward the pointer on `(pointer: fine)` devices and decays back to center when the pointer leaves; each orb applies the offset scaled by its own `depth` (0.08 / 0.55 / 0.35). `useReducedMotion` short-circuits the effect entirely; SSR and client both render the deterministic `t=0` positions, so hydration is clean (the old code's `Math.random()` at render was the hydration-mismatch source visible in the dev log).
+  - `src/app/globals.css` — dropped the now-unreferenced `.hero-spotlight` CSS class (the CSS-var `--sx`/`--sy` approach from the original decision was superseded by the JS transform path).
+  - `package.json` / `package-lock.json` — kept `motion@^12.38.0` (still required for `useReducedMotion`).
+  - `.claude/memory/decisions.md` — dated rejection entry for the particle-field variant so future agents don't re-attempt it.
+- Outcome: PR open against `dev` — `npx tsc --noEmit` clean, `npm run build` clean (all 46 routes), page renders the three orbs server-side (confirmed via curl of `/`). Browser motion couldn't be verified from CLI; the dev box has Windows Reduced Motion enabled (motion library logs the warning), so the static fallback path is what's visible locally until that OS setting is toggled off.
+
 ## 2026-04-23 09:30 UTC — claude/auto-20260423-0930
 - Goal: Close the add-to-cart interaction loop by pulsing the drawer row for the just-added item, so the user sees a confirmation beat after the fly-to-cart arc lands (feature-ideas #12).
 - Changed:

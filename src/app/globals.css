@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 :root {
   --ink: #1a1a1a;
@@ -37,6 +38,13 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Lenis is driving wheel/touch scroll — keep native smooth off while it's
+   active so anchor clicks don't fight the Lenis loop. Reduced-motion users
+   bypass Lenis entirely (the provider bails) so native `smooth` still wins. */
+html.lenis {
+  scroll-behavior: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -84,27 +92,6 @@ body {
 
 .noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-.hero-spotlight {
-  --sx: 50%;
-  --sy: 40%;
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      circle 520px at var(--sx) var(--sy),
-      color-mix(in oklab, var(--ink) 10%, transparent),
-      transparent 62%
-    ),
-    radial-gradient(
-      circle 900px at calc(100% - var(--sx)) calc(100% - var(--sy)),
-      color-mix(in oklab, var(--accent-red) 7%, transparent),
-      transparent 70%
-    );
-  mix-blend-mode: multiply;
-  z-index: 0;
 }
 
 @keyframes fade-up {
